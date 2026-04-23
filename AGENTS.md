@@ -1,180 +1,177 @@
 # AGENTS.md
 
-## Overview
-This document serves as a guide for the team to collaborate effectively when using AI agents in the LocalLink project. LocalLink is a platform designed to connect local Philippine businesses, enabling them to collaborate, trade, and reduce waste. By addressing the unique challenges faced by local businesses, such as limited capital, scalability, and brand awareness, LocalLink aims to strengthen community economies and foster partnerships among neighboring businesses.
+This file is the operating manual for AI coding agents working on LocalLink.
 
-## Conventions
+## 1) Project Mission
 
-### Color Scheme
-- **Primary Color**: Teal (#008080) - Used for the logo, buttons, and active navigation links.
-- **Secondary Color**: White (#FFFFFF) - Used for the background and text areas.
-- **Accent Colors**:
-  - Yellow (#FFD700) - Used for highlighting urgent needs.
-  - Light Gray (#F5F5F5) - Used for background sections and dividers.
+LocalLink helps local Philippine businesses discover nearby partners, trade goods/services, and reduce waste through collaboration.
 
-### Typography
-- **Font Style**: Clean and modern sans-serif font (e.g., similar to Poppins or Open Sans).
-- **Font Sizes**:
-  - Large headings (e.g., "Welcome back, Your Sari-Sari Store!"): ~24px-32px.
-  - Subheadings (e.g., "Here's what's new near you"): ~16px-20px.
-  - Body text (e.g., "Search for supplies, skills, or partners..."): ~14px-16px.
-- **Font Weight**:
-  - Bold for headings and buttons.
-  - Regular for body text.
+When making product decisions, optimize for:
 
-### Button Styles
-- **Primary Buttons**:
-  - Background: Teal (#008080).
-  - Text Color: White (#FFFFFF).
-  - Rounded corners.
-  - Padding: Medium (e.g., 10px-15px).
-- **Secondary Buttons**:
-  - Border: Teal (#008080).
-  - Text Color: Teal (#008080).
-  - Background: White (#FFFFFF).
-  - Rounded corners.
+1. Trust and clarity for small business owners.
+2. Fast, low-friction actions on mobile.
+3. Local relevance (proximity, barangay/city context, practical needs).
 
-### Navigation Bar
-- **Layout**: Horizontal navigation bar at the top.
-- **Active Link**: Teal background with white text.
-- **Inactive Links**: Black text with no background.
+## 2) Current Stack
 
-### Card Design
-- **Layout**: Grid layout for displaying cards.
-- **Card Elements**:
-  - Image at the top.
-  - Title in bold.
-  - Subtitle in smaller font size.
-  - Tags (e.g., "Barter Available", "Urgent Need") with distinct colors:
-    - Barter Available: Light Green.
-    - Urgent Need: Yellow.
+- Framework: Next.js 16 (App Router)
+- Language: TypeScript 5 (strict)
+- UI: React 19
+- Styling: Tailwind CSS 4 via PostCSS
+- Auth/backend client: @supabase/supabase-js
+- Linting: ESLint 9 + eslint-config-next (Core Web Vitals + TypeScript)
 
-### Search and Filters
-- **Search Bar**:
-  - Placeholder text: Light gray.
-  - Rounded corners.
-- **Filters**:
-  - Dropdown menus for "Location" and "Category".
-  - Toggle buttons for "DTI-Registered Only", "Barter-Friendly", and "Urgent Needs".
+Common scripts:
 
-### Layout
-- **Spacing**:
-  - Consistent padding and margins between elements.
-  - Adequate white space for readability.
-- **Alignment**:
-  - Left-aligned text for most elements.
-  - Centered text for headings and buttons.
+- npm run dev
+- npm run lint
+- npm run build
+- npm run start
 
-### Icons
-- **Style**: Minimalistic and modern.
-- **Usage**:
-  - Icons for navigation (e.g., Home, Discover, Messages, Profile).
-  - Icons for trusted partners and other visual indicators.
+## 3) Repository Layout
 
-### Accessibility
-- **Contrast**: Ensure sufficient contrast between text and background for readability.
-- **Responsive Design**: Ensure the layout adapts to different screen sizes (mobile, tablet, desktop).
+Current top-level layout:
 
-## Page-Specific Details
+- app/: App Router routes and global app shell
+- components/: reusable UI, layout, and feature components
+- lib/: constants, hooks, mock data, Supabase client, and domain types
+- public/: static assets
 
-### Discover
-- **Purpose**: To allow users to browse template businesses.
-- **Features**:
-  - Search bar for finding specific businesses.
-  - Filters for narrowing down search results (e.g., location, category, DTI-registered, barter-friendly, urgent needs).
-  - Connect button to establish contact with businesses.
+Current route and app structure:
 
-### Inbox
-- **Purpose**: To manage user notifications and messages.
-- **Features**:
-  - Notifications for new messages or updates.
-  - Messaging functionality to communicate with business contacts.
+- app/layout.tsx: root layout and shared navigation shell
+- app/page.tsx: redirects from `/` to `/login`
+- app/home/page.tsx: Home placeholder route
+- app/discover/page.tsx: Discover placeholder route
+- app/inbox/page.tsx: Inbox placeholder route
+- app/profile/page.tsx: Profile placeholder route
+- app/login/page.tsx: Login placeholder route
+- app/signup/page.tsx: Signup placeholder route
+- app/globals.css: token source of truth for shared visual values
 
-### Profile
-- **Purpose**: To display and manage user and business information.
-- **Features**:
-  - User and business name, location, and trust score.
-  - List of connections and inventory (items available and needed).
-  - Settings for customization.
+Current component structure:
 
-### Home
-- **Purpose**: To provide a personalized dashboard for the user.
-- **Features**:
-  - Welcome message with user/business name.
-  - Quick actions (e.g., Post a Need, Post an Offer).
-  - Trusted partners section.
-  - Search bar and filters for exploring businesses.
-  - Display of new or relevant businesses.
+- components/layout/main-nav.tsx: top navigation shell
+- components/ui/section-card.tsx: reusable section container
+- components/features/business-list.tsx: business list placeholder renderer
+- components/features/inbox-columns.tsx: inbox two-column placeholder layout
+- components/features/profile-overview.tsx: profile summary placeholder layout
 
-### Login/Sign-Up
-- **Purpose**: To allow users to register and log in to the platform.
-- **Features**:
-  - Registration with username and password.
-  - Integration with Supabase for authentication.
-  - Collection of user details (e.g., name, business, location).
+Current lib structure:
 
-## PH-Specific Features
-- **Bilingual UI**: Supports both Tagalog and English for accessibility.
-- **Offline Mode**: Provides basic functionality without internet access for areas with poor connectivity.
-- **Verification Badges**: Includes DTI/SEC registration tags and peer-endorsed trust badges to establish credibility.
-- **Barter/Trade System**: Facilitates non-cash exchanges between businesses.
-- **Localized Search**: Allows filtering by proximity, industry, and specific needs.
+- lib/constants/routes.ts: route constants and nav item definitions
+- lib/supabase/client.ts: browser Supabase client factory
+- lib/types/: domain models for business, message, and profile
+- lib/mocks/: mock data layer for scaffold pages
+- lib/hooks/index.ts: hooks entry point placeholder for future custom hooks
 
-## Usage
-Provide clear instructions on how to use the agents in the project. Include details on how to integrate them into the workflow and any prerequisites for their usage.
+Environment and secrets policy:
 
-## Examples
-Include code snippets or examples of agent usage for each page. For instance:
+- `.env.example` must contain variable names only (no real keys)
+- real values belong in local, uncommitted environment files
+- required public variables: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
-```javascript
-// Example: Using an agent to fetch businesses in the Discover page
-const businesses = await agent.fetchBusinesses({
-  location: 'Quezon City',
-  category: 'Sari-sari Store',
-  filters: ['DTI-Registered', 'Barter-Friendly']
-});
-console.log(businesses);
-```
+## 4) Non-Negotiable Engineering Rules
 
-```javascript
-// Example: Sending a message to a business contact from the Inbox page
-await agent.sendMessage({
-  recipientId: 'business123',
-  message: 'Hello, I am interested in your products.'
-});
-```
+1. Keep TypeScript strict-safe. Do not introduce any/unsafe casts unless absolutely necessary and justified.
+2. Prefer Server Components. Add "use client" only if interactivity/browser APIs are required.
+3. Keep changes scoped. Do not refactor unrelated files in the same task.
+4. Do not hardcode visual values in components when a token can be used.
+5. Preserve existing architecture and naming patterns unless the task explicitly requires change.
 
-```javascript
-// Example: Fetching user profile details
-const profile = await agent.getUserProfile();
-console.log(profile);
-```
+## 5) Design System Rules (Source Of Truth)
 
-```javascript
-// Example: Registering a new user on the Login/Sign-Up page
-await agent.registerUser({
-  username: 'newuser',
-  password: 'securepassword',
-  name: 'John Doe',
-  business: 'John's Store',
-  location: 'Quezon City'
-});
-```
+All shared visual tokens must live in app/globals.css and be consumed through Tailwind semantic utility classes.
 
-```javascript
-// Example: Facilitating a barter/trade system
-const trade = await agent.initiateTrade({
-  offer: '10 extra tables',
-  request: '50kg of rice',
-  partnerId: 'business456'
-});
-console.log(trade);
-```
+Do not place one-off style values directly in component files for:
 
-## Future Enhancements
-- **Integration with Maps**: To provide location-based services and navigation.
-- **Additional Tools**: Consider using Tailwind CSS for styling and MongoDB for database management.
-- **Advanced Algorithms**: Develop a matchmaking system to connect businesses based on mutual interests and needs.
-- **Social Media Integration**: Promote the platform through various social media channels to increase user engagement.
+- colors (hex/rgb/hsl)
+- spacing scales
+- border radius values
+- typography sizes/weights
 
-This document will be updated as the project evolves to include more details and examples.
+If a new visual value is truly needed:
+
+1. Add it as a token in app/globals.css.
+2. Expose/consume it through the existing Tailwind-driven pattern.
+3. Reuse the token in components.
+
+## 6) UX And Product Direction
+
+Apply these defaults unless a task says otherwise:
+
+- Primary color intent: teal for key actions and active states.
+- Prioritize readability and high contrast.
+- Build mobile-first; verify tablet/desktop behavior after.
+- Keep flows simple for business owners with limited time and bandwidth.
+
+Core feature expectations:
+
+- Discover: search + practical filters + clear connect action.
+- Inbox: visible updates and straightforward messaging.
+- Profile: business identity, trust indicators, inventory/needs visibility.
+- Home: quick actions, relevant opportunities, trusted partner signals.
+- Auth: clean sign up/login with Supabase integration.
+
+PH-specific product cues to preserve:
+
+- low-connectivity awareness
+- verification/trust badges (DTI/SEC or peer trust)
+- barter/trade friendliness
+- localized filtering by area and need
+
+## 7) Accessibility And Responsiveness Baseline
+
+Every UI change should:
+
+1. Maintain sufficient contrast.
+2. Keep keyboard focus visible.
+3. Avoid text that becomes unreadable on small screens.
+4. Avoid layouts that only work at desktop widths.
+
+## 8) Agent Workflow (Required)
+
+Follow this sequence for implementation tasks:
+
+1. Inspect the target route/component and nearby reusable patterns before editing.
+2. If route behavior or navigation changes, update `lib/constants/routes.ts` and relevant navigation components.
+3. Implement the smallest correct change.
+4. Keep new assets organized under public/.
+5. Run npm run lint.
+6. Run npx next build --webpack.
+7. Report results: what changed, why, and verification status.
+
+If lint/build fails:
+
+1. Fix issues introduced by your change.
+2. Re-run checks.
+3. Document any remaining blockers clearly.
+
+## 9) What To Avoid
+
+- Introducing new UI libraries for simple UI/layout needs.
+- Converting server components to client components without a real requirement.
+- Leaving temporary external asset URLs when local assets can be stored in public/.
+- Shipping desktop-only positioning that breaks on mobile.
+- Mixing unrelated refactors into a task-focused change.
+
+## 10) Definition Of Done For Agent Tasks
+
+A task is done only when all are true:
+
+1. Requested behavior is implemented.
+2. Code follows token and architecture rules above.
+3. Lint passes.
+4. Production build passes.
+5. Final report includes changed files and verification outcomes.
+
+## 11) Recommended Final Report Template
+
+Use this concise structure when handing work back:
+
+1. Summary of implemented change.
+2. Files changed.
+3. Verification results:
+   - npm run lint
+   - npx next build --webpack
+4. Any follow-up notes or tradeoffs.
