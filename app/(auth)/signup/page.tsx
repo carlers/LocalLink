@@ -1,0 +1,21 @@
+import Link from "next/link";
+import { AuthForm } from "@/components/features/auth-form";
+import { routes } from "@/lib/constants/routes";
+
+export default function SignupPage() {
+  return (
+    <div className="mx-auto w-full max-w-md space-y-4">
+      <h1 className="text-2xl font-semibold">Sign Up</h1>
+      <p className="text-text-muted text-sm">Create a Supabase auth user, then store the profile data in your app flow.</p>
+
+      <AuthForm mode="signup" />
+
+      <p className="text-text-muted text-sm">
+        Already have an account?{" "}
+        <Link href={routes.login} className="text-brand font-medium">
+          Log in here
+        </Link>
+      </p>
+    </div>
+  );
+}

@@ -1,10 +1,19 @@
 import type { Profile } from "@/lib/types/profile";
 
 type ProfileOverviewProps = {
-  profile: Profile;
+  profile?: Profile | null;
 };
 
 export function ProfileOverview({ profile }: ProfileOverviewProps) {
+  if (!profile) {
+    return (
+      <div className="rounded-panel border-border-subtle bg-surface border p-4">
+        <h2 className="text-foreground text-lg font-semibold">Profile</h2>
+        <p className="text-text-muted mt-2 text-sm">No profile data available.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="grid gap-4 md:grid-cols-2">
       <section className="rounded-panel border-border-subtle bg-surface border p-4">
@@ -23,7 +32,7 @@ export function ProfileOverview({ profile }: ProfileOverviewProps) {
       <section className="rounded-panel border-border-subtle bg-surface border p-4 md:col-span-2">
         <h2 className="text-foreground text-lg font-semibold">Inventory Snapshot</h2>
         <ul className="mt-3 grid gap-2 md:grid-cols-2">
-          {profile.inventory.map((item) => (
+          {(profile.inventory || []).map((item) => (
             <li key={item.id} className="rounded-chip bg-surface-muted p-3 text-sm">
               <p className="font-medium">{item.name}</p>
               <p className="text-text-muted">{item.quantity}</p>
