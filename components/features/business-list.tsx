@@ -6,12 +6,31 @@ type BusinessListProps = {
 
 export function BusinessList({ businesses }: BusinessListProps) {
   return (
-    <ul className="grid gap-3">
+    <ul className="grid gap-4">
       {businesses.map((business) => (
-        <li key={business.id} className="rounded-chip border-border-subtle bg-surface-muted border p-3">
-          <p className="text-foreground font-medium">{business.name}</p>
-          <p className="text-text-muted text-sm">{business.location} • {business.category}</p>
-          <p className="text-text-muted mt-1 text-sm">{business.shortDescription}</p>
+        <li key={business.id} className="rounded-panel border-border-subtle bg-surface border p-5 shadow-sm shadow-surface-muted/40">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-foreground text-lg font-semibold">{business.name}</p>
+              <p className="mt-1 text-sm text-text-muted">{business.location} • {business.category}</p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 text-xs font-medium uppercase tracking-[0.16em] text-text-muted">
+              {business.isDtiRegistered && <span className="rounded-full border border-brand/20 bg-brand/10 px-2 py-1 text-brand">DTI Registered</span>}
+              {business.isBarterFriendly && <span className="rounded-full border border-foreground/10 bg-surface-muted px-2 py-1">Barter Friendly</span>}
+              {business.hasUrgentNeed && <span className="rounded-full border border-accent-urgent/20 bg-accent-urgent/10 px-2 py-1 text-accent-urgent">Urgent Need</span>}
+            </div>
+          </div>
+
+          <p className="mt-4 text-sm leading-6 text-text-muted">{business.shortDescription}</p>
+
+          <div className="mt-4 flex flex-wrap gap-3">
+            <button className="rounded-full border border-brand bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-700" type="button">
+              View profile
+            </button>
+            <button className="rounded-full border border-border-subtle bg-surface-muted px-4 py-2 text-sm font-medium text-foreground transition hover:bg-surface" type="button">
+              Connect
+            </button>
+          </div>
         </li>
       ))}
     </ul>
