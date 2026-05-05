@@ -80,7 +80,7 @@ export function AuthForm({ mode }: AuthFormProps) {
   }
 
   return (
-    <form className="rounded-panel border-border-subtle bg-surface border p-4" onSubmit={handleSubmit}>
+    <form className="rounded-panel border-border-subtle bg-surface border p-4 sm:p-6" onSubmit={handleSubmit}>
       {isSignup ? (
         <>
           <label className="text-sm font-medium" htmlFor="fullName">
@@ -90,7 +90,7 @@ export function AuthForm({ mode }: AuthFormProps) {
             id="fullName"
             name="fullName"
             type="text"
-            className="rounded-chip border-border-subtle mt-1 w-full border px-3 py-2"
+            className="rounded-chip border-border-subtle mt-1 w-full border px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
             placeholder="Juan Dela Cruz"
             value={fullName}
             onChange={(event) => setFullName(event.target.value)}
@@ -105,7 +105,7 @@ export function AuthForm({ mode }: AuthFormProps) {
             id="businessName"
             name="businessName"
             type="text"
-            className="rounded-chip border-border-subtle mt-1 w-full border px-3 py-2"
+            className="rounded-chip border-border-subtle mt-1 w-full border px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
             placeholder="Your business name"
             value={businessName}
             onChange={(event) => setBusinessName(event.target.value)}
@@ -120,7 +120,7 @@ export function AuthForm({ mode }: AuthFormProps) {
             id="location"
             name="location"
             type="text"
-            className="rounded-chip border-border-subtle mt-1 w-full border px-3 py-2"
+            className="rounded-chip border-border-subtle mt-1 w-full border px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
             placeholder="City or barangay"
             value={location}
             onChange={(event) => setLocation(event.target.value)}
@@ -137,7 +137,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         id="email"
         name="email"
         type="email"
-        className="rounded-chip border-border-subtle mt-1 w-full border px-3 py-2"
+        className="rounded-chip border-border-subtle mt-1 w-full border px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
         placeholder="you@business.com"
         value={email}
         onChange={(event) => setEmail(event.target.value)}
@@ -152,7 +152,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         id="password"
         name="password"
         type="password"
-        className="rounded-chip border-border-subtle mt-1 w-full border px-3 py-2"
+        className="rounded-chip border-border-subtle mt-1 w-full border px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
         placeholder={isSignup ? "Create password" : "Enter password"}
         value={password}
         onChange={(event) => setPassword(event.target.value)}
@@ -165,7 +165,7 @@ export function AuthForm({ mode }: AuthFormProps) {
 
       <button
         type="submit"
-        className="rounded-chip bg-brand mt-4 w-full px-3 py-2 text-sm font-semibold text-white disabled:opacity-60"
+        className="rounded-chip bg-brand mt-4 w-full px-3 py-3 text-sm font-semibold text-white disabled:opacity-60 sm:py-2.5"
         disabled={isSubmitting}
       >
         {isSubmitting ? "Please wait..." : isSignup ? "Sign Up" : "Log In"}

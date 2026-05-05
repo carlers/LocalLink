@@ -57,8 +57,8 @@ export default async function ProfilePage() {
   }
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">Profile</h1>
+    <div className="space-y-4 sm:space-y-6">
+      <h1 className="text-2xl font-semibold leading-tight sm:text-3xl">Profile</h1>
       <p className="text-text-muted text-sm">Business identity, trust indicators, and inventory placeholders.</p>
       <ProfileOverview profile={profileData} />
     </div>

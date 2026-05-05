@@ -2,8 +2,8 @@ import { SectionCard } from "@/components/ui/section-card";
 
 export default function HomePage() {
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">Welcome back, your business hub is ready.</h1>
+    <div className="space-y-4 sm:space-y-6">
+      <h1 className="text-2xl font-semibold leading-tight sm:text-3xl">Welcome back, your business hub is ready.</h1>
 
       <SectionCard title="Quick Actions" description="Start fast actions for your daily operations.">
         <ul className="text-text-muted list-inside list-disc text-sm">

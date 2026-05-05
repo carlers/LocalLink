@@ -38,7 +38,7 @@ export function DiscoverSearch({ onFilter, isLoading = false }: DiscoverSearchPr
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-3 md:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-2">
         <div>
           <label className="block text-sm font-medium" htmlFor="search">
             Search businesses
@@ -47,7 +47,7 @@ export function DiscoverSearch({ onFilter, isLoading = false }: DiscoverSearchPr
             id="search"
             type="text"
             placeholder="Business name or description"
-            className="rounded-chip border-border-subtle mt-2 w-full border px-3 py-2 text-sm"
+            className="rounded-chip border-border-subtle mt-2 w-full border px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
             value={searchQuery}
             onChange={(e) => handleSearch(e.target.value)}
             disabled={isLoading}
@@ -62,7 +62,7 @@ export function DiscoverSearch({ onFilter, isLoading = false }: DiscoverSearchPr
             id="location"
             type="text"
             placeholder="City or barangay"
-            className="rounded-chip border-border-subtle mt-2 w-full border px-3 py-2 text-sm"
+            className="rounded-chip border-border-subtle mt-2 w-full border px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
             value={selectedLocation}
             onChange={(e) => handleLocationChange(e.target.value)}
             disabled={isLoading}
@@ -72,14 +72,14 @@ export function DiscoverSearch({ onFilter, isLoading = false }: DiscoverSearchPr
 
       <div>
         <label className="block text-sm font-medium">Category</label>
-        <div className="mt-2 flex flex-wrap gap-2">
+        <div className="mt-2 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
           {CATEGORIES.map((category) => (
             <button
               key={category}
               onClick={() => handleCategoryChange(category)}
-              className={`rounded-chip border px-3 py-2 text-sm transition-colors ${selectedCategory === category
-                  ? "border-brand bg-brand text-white"
-                  : "border-border-subtle bg-surface-muted text-foreground hover:bg-surface"
+              className={`rounded-chip border px-3 py-3 text-sm transition-colors sm:py-2 ${selectedCategory === category
+                ? "border-brand bg-brand text-white"
+                : "border-border-subtle bg-surface-muted text-foreground hover:bg-surface"
                 }`}
               disabled={isLoading}
               type="button"
@@ -94,7 +94,7 @@ export function DiscoverSearch({ onFilter, isLoading = false }: DiscoverSearchPr
         <button
           onClick={clearFilters}
           disabled={isLoading}
-          className="text-sm text-brand underline hover:no-underline"
+          className="text-sm font-medium text-brand underline-offset-4 hover:underline"
           type="button"
         >
           Clear filters
