@@ -35,35 +35,47 @@ Current top-level layout:
 - app/: App Router routes and global app shell
 - components/: reusable UI, layout, and feature components
 - lib/: constants, hooks, mock data, Supabase client, and domain types
+- supabase/: SQL migrations and schema policies
 - public/: static assets
 
 Current route and app structure:
 
 - app/layout.tsx: root layout and shared navigation shell
 - app/page.tsx: redirects from `/` to `/login`
-- app/home/page.tsx: Home placeholder route
-- app/discover/page.tsx: Discover placeholder route
-- app/inbox/page.tsx: Inbox placeholder route
-- app/profile/page.tsx: Profile placeholder route
-- app/login/page.tsx: Login placeholder route
-- app/signup/page.tsx: Signup placeholder route
+- app/(app)/layout.tsx: authenticated app shell
+- app/(app)/home/page.tsx: Home route with nearby business matches
+- app/(app)/discover/page.tsx: Discover route with search/filters
+- app/(app)/inbox/page.tsx: Inbox route with pending connection requests
+- app/(app)/profile/page.tsx: current user profile and connected businesses
+- app/(app)/business/[id]/page.tsx: public business profile route
+- app/(auth)/login/page.tsx: login route
+- app/(auth)/signup/page.tsx: signup route
 - app/globals.css: token source of truth for shared visual values
 
 Current component structure:
 
 - components/layout/main-nav.tsx: top navigation shell
 - components/ui/section-card.tsx: reusable section container
-- components/features/business-list.tsx: business list placeholder renderer
-- components/features/inbox-columns.tsx: inbox two-column placeholder layout
-- components/features/profile-overview.tsx: profile summary placeholder layout
+- components/features/business-list.tsx: business list with connect state actions
+- components/features/connect-request-button.tsx: profile-level connect/disconnect CTA
+- components/features/discover-search.tsx: search and filter controls
+- components/features/inbox-columns.tsx: inbox layout and connection request actions
+- components/features/profile-overview.tsx: profile summary and connected businesses
 
 Current lib structure:
 
 - lib/constants/routes.ts: route constants and nav item definitions
 - lib/supabase/client.ts: browser Supabase client factory
-- lib/types/: domain models for business, message, and profile
+- lib/supabase/server.ts: server Supabase client factory
+- lib/types/: domain models for business, connection, message, and profile
 - lib/mocks/: mock data layer for scaffold pages
 - lib/hooks/index.ts: hooks entry point placeholder for future custom hooks
+
+Current database migration structure:
+
+- supabase/migrations/0001_phase_1_schema.sql: base tables, enums, and policies
+- supabase/migrations/0002_connection_requests.sql: connection request table and core RLS policies
+- supabase/migrations/0003_public_accepted_connections_read.sql: authenticated read policy for accepted connection graph
 
 Environment and secrets policy:
 
@@ -107,11 +119,19 @@ Apply these defaults unless a task says otherwise:
 
 Core feature expectations:
 
-- Discover: search + practical filters + clear connect action.
-- Inbox: visible updates and straightforward messaging.
-- Profile: business identity, trust indicators, inventory/needs visibility.
+- Discover: search + practical filters + clear connect/disconnect action states.
+- Inbox: visible updates and pending connection request accept/decline actions.
+- Profile: business identity, trust indicators, and connected businesses visibility.
 - Home: quick actions, relevant opportunities, trusted partner signals.
 - Auth: clean sign up/login with Supabase integration.
+
+Connection behavior expectations:
+
+- A connection starts as a pending request from requester to receiver.
+- Receiver accepts from Inbox to create an accepted connection.
+- Requester can cancel pending outgoing requests.
+- Connected parties can disconnect with a confirmation step.
+- Connection counts should be computed from accepted connection records, not stale cached fields.
 
 PH-specific product cues to preserve:
 
@@ -136,10 +156,11 @@ Follow this sequence for implementation tasks:
 1. Inspect the target route/component and nearby reusable patterns before editing.
 2. If route behavior or navigation changes, update `lib/constants/routes.ts` and relevant navigation components.
 3. Implement the smallest correct change.
-4. Keep new assets organized under public/.
-5. Run npm run lint.
-6. Run npx next build --webpack.
-7. Report results: what changed, why, and verification status.
+4. If schema or RLS changes are needed, add a new numbered migration in supabase/migrations (never rewrite an applied migration).
+5. Keep new assets organized under public/.
+6. Run npm run lint.
+7. Run npx next build --webpack.
+8. Report results: what changed, why, and verification status.
 
 If lint/build fails:
 
