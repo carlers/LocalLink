@@ -39,7 +39,7 @@ export function useRealtimeNotifications(
             id: payload.new.id,
             title: payload.new.title,
             detail: payload.new.detail,
-            createdAt: new Date(payload.new.created_at),
+            createdAt: payload.new.created_at,
             isRead: payload.new.is_read,
           };
           onNewNotification(newNotification);
@@ -64,7 +64,7 @@ export function useRealtimeNotifications(
             id: payload.new.id,
             title: payload.new.title,
             detail: payload.new.detail,
-            createdAt: new Date(payload.new.created_at),
+            createdAt: payload.new.created_at,
             isRead: payload.new.is_read,
           };
           onNotificationUpdated(updatedNotification);
