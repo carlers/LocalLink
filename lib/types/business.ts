@@ -15,4 +15,5 @@ export type Business = {
   isBarterFriendly: boolean;
   hasUrgentNeed: boolean;
   shortDescription: string;
+  imageUrl?: string | null;
 };

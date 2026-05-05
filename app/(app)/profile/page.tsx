@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { ProfileOverview } from "@/components/features/profile-overview";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { ConnectedBusiness, Profile } from "@/lib/types/profile";
@@ -171,8 +172,18 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      <h1 className="text-2xl font-semibold leading-tight sm:text-3xl">Profile</h1>
-      <p className="text-text-muted text-sm">Business identity, trust indicators, and inventory placeholders.</p>
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold leading-tight sm:text-3xl">Profile</h1>
+          <p className="mt-1 text-text-muted text-sm">Business identity, trust indicators, and inventory placeholders.</p>
+        </div>
+        <Link
+          href="/profile/edit"
+          className="rounded-chip bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-700"
+        >
+          Edit Profile
+        </Link>
+      </div>
       {error ? (
         <div className="rounded-panel border-border-subtle bg-status-error-bg border border-status-error-fg p-4 text-sm text-status-error-fg">
           {error}

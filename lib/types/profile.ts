@@ -22,4 +22,5 @@ export type Profile = {
   connections: number;
   inventory: InventoryItem[];
   connectedBusinesses: ConnectedBusiness[];
+  profileImageUrl?: string | null;
 };
