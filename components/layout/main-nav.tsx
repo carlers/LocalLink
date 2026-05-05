@@ -8,7 +8,8 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export function MainNav() {
   const [userPresent, setUserPresent] = useState(false);
-  const [open, setOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
 
@@ -23,7 +24,7 @@ export function MainNav() {
 
     function onDoc(e: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setOpen(false);
+        setAccountOpen(false);
       }
     }
 
@@ -41,13 +42,13 @@ export function MainNav() {
   }
 
   return (
-    <header className="border-border-subtle bg-surface border-b">
-      <nav className="mx-auto flex w-full max-w-5xl items-center justify-between px-4 py-3">
+    <header className="border-border-subtle bg-surface/95 border-b backdrop-blur">
+      <nav className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
         <Link href={routes.home} className="text-foreground text-lg font-semibold">
           LocalLink
         </Link>
 
-        <div className="flex items-center gap-3">
+        <div className="hidden items-center gap-3 md:flex">
           <ul className="flex items-center gap-2">
             {mainNavItems.map((item) => (
               <li key={item.href}>
@@ -65,7 +66,8 @@ export function MainNav() {
             <div className="relative" ref={menuRef}>
               <button
                 aria-label="Account menu"
-                onClick={() => setOpen((s) => !s)}
+                aria-expanded={accountOpen}
+                onClick={() => setAccountOpen((s) => !s)}
                 className="rounded-full bg-surface-muted p-2"
               >
                 <svg className="h-5 w-5 text-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -73,12 +75,12 @@ export function MainNav() {
                 </svg>
               </button>
 
-              {open && (
+              {accountOpen && (
                 <div className="absolute right-0 mt-2 w-40 rounded-panel border-border-subtle bg-surface border p-2 shadow-lg">
                   <Link
                     href={routes.profile}
                     className="block px-3 py-2 text-sm text-text-muted hover:bg-surface-muted rounded"
-                    onClick={() => setOpen(false)}
+                    onClick={() => setAccountOpen(false)}
                   >
                     Profile
                   </Link>
@@ -93,7 +95,59 @@ export function MainNav() {
             </div>
           )}
         </div>
+
+        <button
+          type="button"
+          aria-label="Open menu"
+          aria-expanded={mobileOpen}
+          aria-controls="mobile-menu"
+          onClick={() => setMobileOpen((s) => !s)}
+          className="rounded-chip border-border-subtle bg-surface-muted inline-flex items-center justify-center border p-2 md:hidden"
+        >
+          <svg className="h-5 w-5 text-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
       </nav>
+
+      {mobileOpen ? (
+        <div id="mobile-menu" className="border-border-subtle border-t px-4 py-3 sm:px-6 md:hidden">
+          <ul className="space-y-2">
+            {mainNavItems.map((item) => (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  onClick={() => setMobileOpen(false)}
+                  className="text-text-muted hover:bg-surface-muted hover:text-foreground block rounded-chip px-3 py-3 text-sm font-medium"
+                >
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+
+          {userPresent ? (
+            <div className="mt-3 space-y-2 border-border-subtle border-t pt-3">
+              <Link
+                href={routes.profile}
+                onClick={() => setMobileOpen(false)}
+                className="text-text-muted hover:bg-surface-muted hover:text-foreground block rounded-chip px-3 py-3 text-sm font-medium"
+              >
+                Profile
+              </Link>
+              <button
+                onClick={async () => {
+                  setMobileOpen(false);
+                  await handleLogout();
+                }}
+                className="text-text-muted hover:bg-surface-muted hover:text-foreground block w-full rounded-chip px-3 py-3 text-left text-sm font-medium"
+              >
+                Log out
+              </button>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
     </header>
   );
 }

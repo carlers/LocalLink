@@ -8,16 +8,30 @@ export function BusinessList({ businesses }: BusinessListProps) {
   return (
     <ul className="grid gap-4">
       {businesses.map((business) => (
-        <li key={business.id} className="rounded-panel border-border-subtle bg-surface border p-5 shadow-sm shadow-surface-muted/40">
+        <li key={business.id} className="rounded-panel border-border-subtle bg-surface border p-4 shadow-sm shadow-surface-muted/40 sm:p-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <p className="text-foreground text-lg font-semibold">{business.name}</p>
-              <p className="mt-1 text-sm text-text-muted">{business.location} • {business.category}</p>
+              <p className="text-lg font-semibold text-foreground">{business.name}</p>
+              <p className="mt-1 text-sm text-text-muted">
+                {business.location} • {business.category}
+              </p>
             </div>
             <div className="flex flex-wrap items-center gap-2 text-xs font-medium uppercase tracking-[0.16em] text-text-muted">
-              {business.isDtiRegistered && <span className="rounded-full border border-brand/20 bg-brand/10 px-2 py-1 text-brand">DTI Registered</span>}
-              {business.isBarterFriendly && <span className="rounded-full border border-foreground/10 bg-surface-muted px-2 py-1">Barter Friendly</span>}
-              {business.hasUrgentNeed && <span className="rounded-full border border-accent-urgent/20 bg-accent-urgent/10 px-2 py-1 text-accent-urgent">Urgent Need</span>}
+              {business.isDtiRegistered ? (
+                <span className="rounded-full border border-brand/20 bg-brand/10 px-2 py-1 text-brand">
+                  DTI Registered
+                </span>
+              ) : null}
+              {business.isBarterFriendly ? (
+                <span className="rounded-full border border-foreground/10 bg-surface-muted px-2 py-1">
+                  Barter Friendly
+                </span>
+              ) : null}
+              {business.hasUrgentNeed ? (
+                <span className="rounded-full border border-accent-urgent/20 bg-accent-urgent/10 px-2 py-1 text-accent-urgent">
+                  Urgent Need
+                </span>
+              ) : null}
             </div>
           </div>
 

@@ -137,18 +137,18 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="space-y-6">
-      <section className="rounded-panel border-border-subtle bg-surface border p-6 shadow-sm shadow-surface-muted/40">
+    <div className="space-y-4 sm:space-y-6">
+      <section className="rounded-panel border-border-subtle bg-surface border p-4 shadow-sm shadow-surface-muted/40 sm:p-6">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-2xl">
             <p className="text-sm uppercase tracking-[0.28em] text-brand">Home</p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight">Welcome back, {ownerName}.</h1>
+            <h1 className="mt-2 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">Welcome back, {ownerName}.</h1>
             <p className="mt-3 text-text-muted sm:text-base">
               Browse local suppliers, urgent needs, and barter-friendly partners near {businessLocation}.
             </p>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-3 lg:min-w-[320px]">
             <div className="rounded-chip bg-surface-muted p-4 text-sm">
               <p className="text-text-muted">Matches</p>
               <p className="mt-2 text-2xl font-semibold text-foreground">{stats.total}</p>
@@ -178,13 +178,13 @@ export default function HomePage() {
               <div className="rounded-panel border-border-subtle bg-surface border p-4">
                 <p className="text-sm text-text-muted">Quick actions</p>
                 <div className="mt-3 grid gap-3">
-                  <Link href="/discover" className="rounded-chip bg-brand px-4 py-2 text-sm font-semibold text-white text-center transition hover:bg-teal-700">
+                  <Link href="/discover" className="rounded-chip bg-brand px-4 py-3 text-sm font-semibold text-white text-center transition hover:bg-teal-700 sm:py-2">
                     Browse suppliers
                   </Link>
-                  <Link href="/profile" className="rounded-chip border border-border-subtle bg-surface-muted px-4 py-2 text-sm font-medium text-foreground text-center transition hover:bg-surface">
+                  <Link href="/profile" className="rounded-chip border border-border-subtle bg-surface-muted px-4 py-3 text-sm font-medium text-foreground text-center transition hover:bg-surface sm:py-2">
                     View profile
                   </Link>
-                  <Link href="/inbox" className="rounded-chip border border-border-subtle bg-surface-muted px-4 py-2 text-sm font-medium text-foreground text-center transition hover:bg-surface">
+                  <Link href="/inbox" className="rounded-chip border border-border-subtle bg-surface-muted px-4 py-3 text-sm font-medium text-foreground text-center transition hover:bg-surface sm:py-2">
                     Check inbox
                   </Link>
                 </div>

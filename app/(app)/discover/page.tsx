@@ -86,27 +86,8 @@ export default function DiscoverPage() {
   }, []);
 
   return (
-    <div className="space-y-6">
-      <section className="rounded-panel border-border-subtle bg-surface border p-6 shadow-sm shadow-surface-muted/50">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-2xl">
-            <p className="text-sm uppercase tracking-[0.28em] text-brand">Discover</p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight">Find local suppliers, partners, and trade opportunities.</h1>
-            <p className="mt-3 text-text-muted sm:text-base">Search nearby businesses by name, category, or location. Review trust indicators and barter-friendly offers in one place.</p>
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-chip bg-surface-muted p-4 text-sm">
-              <p className="text-text-muted">Status</p>
-              <p className="mt-1 font-semibold text-foreground">{resultSummary}</p>
-            </div>
-            <div className="rounded-chip bg-surface-muted p-4 text-sm">
-              <p className="text-text-muted">Query state</p>
-              <p className="mt-1 font-semibold text-foreground">{isLoading ? "Updating..." : "Ready"}</p>
-            </div>
-          </div>
-        </div>
-      </section>
+    <div className="space-y-4">
+      <h1 className="text-2xl font-semibold">Discover Businesses</h1>
 
       <SectionCard title="Search And Filters" description="Find businesses by location, category, and practical needs.">
         <DiscoverSearch onFilter={fetchBusinesses} isLoading={isLoading} />
