@@ -2,8 +2,10 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { InboxColumns } from "@/components/features/inbox-columns";
-import type { Message, Notification } from "@/lib/types/message";
+import type { Conversation, Notification } from "@/lib/types/message";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { useRealtimeConversations } from "@/lib/hooks/useRealtimeConversations";
+import { useRealtimeNotifications } from "@/lib/hooks/useRealtimeNotifications";
 
 type ConnectionRequestRow = {
   id: string;
@@ -36,15 +38,14 @@ type NotificationRow = {
 
 type ConversationRow = {
   id: string;
+  partner_name: string;
+  last_message_preview: string | null;
+  last_message_at: string | null;
+  is_archived: boolean;
 };
 
-type MessageRow = {
-  id: string;
+type UnreadMessageRow = {
   conversation_id: string;
-  sender_name: string;
-  preview: string;
-  sent_at: string;
-  is_unread: boolean;
 };
 
 type PendingRequest = {
@@ -54,6 +55,11 @@ type PendingRequest = {
   ownerName: string;
   businessName: string;
   location: string;
+};
+
+type UserSummaryRow = {
+  owner_name: string;
+  business_name: string;
 };
 
 const formatTimestamp = (value: string) => {
@@ -73,10 +79,11 @@ const formatTimestamp = (value: string) => {
 export default function InboxPage() {
   const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
   const [actionLoadingRequestId, setActionLoadingRequestId] = useState<string | null>(null);
   const [notificationActionLoadingId, setNotificationActionLoadingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
 
   const loadInboxData = useCallback(async () => {
     setError(null);
@@ -86,11 +93,13 @@ export default function InboxPage() {
     if (!authData.user?.id) {
       setPendingRequests([]);
       setNotifications([]);
-      setMessages([]);
+      setConversations([]);
+      setUserId(null);
       return;
     }
 
     const userId = authData.user.id;
+    setUserId(userId);
 
     const [requestResult, notificationResult, conversationResult] = await Promise.all([
       supabase
@@ -106,7 +115,7 @@ export default function InboxPage() {
         .order("created_at", { ascending: false }),
       supabase
         .from("conversations")
-        .select("id")
+        .select("id, partner_name, last_message_preview, last_message_at, is_archived")
         .eq("profile_id", userId)
         .eq("is_archived", false)
         .order("last_message_at", { ascending: false })
@@ -119,7 +128,7 @@ export default function InboxPage() {
       setError(requestError.message);
       setPendingRequests([]);
       setNotifications([]);
-      setMessages([]);
+      setConversations([]);
       return;
     }
 
@@ -127,7 +136,7 @@ export default function InboxPage() {
       setError(notificationResult.error.message);
       setPendingRequests([]);
       setNotifications([]);
-      setMessages([]);
+      setConversations([]);
       return;
     }
 
@@ -135,7 +144,7 @@ export default function InboxPage() {
       setError(conversationResult.error.message);
       setPendingRequests([]);
       setNotifications([]);
-      setMessages([]);
+      setConversations([]);
       return;
     }
 
@@ -159,7 +168,7 @@ export default function InboxPage() {
         setError(businessesResult.error.message);
         setPendingRequests([]);
         setNotifications([]);
-        setMessages([]);
+        setConversations([]);
         return;
       }
 
@@ -167,7 +176,7 @@ export default function InboxPage() {
         setError(profilesResult.error.message);
         setPendingRequests([]);
         setNotifications([]);
-        setMessages([]);
+        setConversations([]);
         return;
       }
 
@@ -209,36 +218,109 @@ export default function InboxPage() {
       })),
     );
 
-    const conversationIds = ((conversationResult.data ?? []) as ConversationRow[]).map((conversation) => conversation.id);
-    if (conversationIds.length === 0) {
-      setMessages([]);
-      return;
+    const conversationRows = (conversationResult.data ?? []) as ConversationRow[];
+    const conversationIds = conversationRows.map((conversation) => conversation.id);
+
+    let unreadCounts = new Map<string, number>();
+    if (conversationIds.length > 0) {
+      const { data: unreadMessagesData, error: unreadMessagesError } = await supabase
+        .from("messages")
+        .select("conversation_id")
+        .in("conversation_id", conversationIds)
+        .eq("is_unread", true);
+
+      if (unreadMessagesError) {
+        setError(unreadMessagesError.message);
+        setConversations([]);
+        return;
+      }
+
+      unreadCounts = new Map<string, number>();
+      for (const message of (unreadMessagesData ?? []) as UnreadMessageRow[]) {
+        unreadCounts.set(message.conversation_id, (unreadCounts.get(message.conversation_id) ?? 0) + 1);
+      }
     }
 
-    const { data: messagesData, error: messagesError } = await supabase
-      .from("messages")
-      .select("id, conversation_id, sender_name, preview, sent_at, is_unread")
-      .in("conversation_id", conversationIds)
-      .order("sent_at", { ascending: false })
-      .limit(10);
-
-    if (messagesError) {
-      setError(messagesError.message);
-      setMessages([]);
-      return;
-    }
-
-    setMessages(
-      ((messagesData ?? []) as MessageRow[]).map((message) => ({
-        id: message.id,
-        conversationId: message.conversation_id,
-        senderName: message.sender_name,
-        preview: message.preview,
-        sentAt: formatTimestamp(message.sent_at),
-        isUnread: message.is_unread,
+    setConversations(
+      conversationRows.map((conversation) => ({
+        id: conversation.id,
+        partnerName: conversation.partner_name,
+        lastMessagePreview: conversation.last_message_preview ?? "No messages yet.",
+        lastMessageAt: conversation.last_message_at ? formatTimestamp(conversation.last_message_at) : null,
+        unreadCount: unreadCounts.get(conversation.id) ?? 0,
       })),
     );
   }, []);
+
+  const getUserSummary = async (supabase: ReturnType<typeof createSupabaseBrowserClient>, userId: string) => {
+    const [profileResult, businessResult] = await Promise.all([
+      supabase.from("profiles").select("owner_name, business_name").eq("id", userId).maybeSingle<UserSummaryRow>(),
+      supabase.from("businesses").select("name").eq("owner_id", userId).maybeSingle<{ name: string }>(),
+    ]);
+
+    if (profileResult.error) {
+      throw profileResult.error;
+    }
+
+    if (businessResult.error) {
+      throw businessResult.error;
+    }
+
+    return {
+      ownerName: profileResult.data?.owner_name ?? "Business owner",
+      businessName: businessResult.data?.name ?? profileResult.data?.business_name ?? "Local business",
+    };
+  };
+
+  const ensureConversationSnapshot = async (
+    supabase: ReturnType<typeof createSupabaseBrowserClient>,
+    profileId: string,
+    partnerName: string,
+    lastMessagePreview: string,
+    lastMessageAt: string,
+  ) => {
+    const { data: existingConversation, error: selectError } = await supabase
+      .from("conversations")
+      .select("id")
+      .eq("profile_id", profileId)
+      .eq("partner_name", partnerName)
+      .maybeSingle<{ id: string }>();
+
+    if (selectError) {
+      throw selectError;
+    }
+
+    if (existingConversation?.id) {
+      const { error: updateError } = await supabase
+        .from("conversations")
+        .update({ last_message_preview: lastMessagePreview, last_message_at: lastMessageAt, is_archived: false })
+        .eq("id", existingConversation.id);
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      return existingConversation.id;
+    }
+
+    const { data: insertedConversation, error: insertError } = await supabase
+      .from("conversations")
+      .insert({
+        profile_id: profileId,
+        partner_name: partnerName,
+        last_message_preview: lastMessagePreview,
+        last_message_at: lastMessageAt,
+        is_archived: false,
+      })
+      .select("id")
+      .maybeSingle<{ id: string }>();
+
+    if (insertError) {
+      throw insertError;
+    }
+
+    return insertedConversation?.id ?? null;
+  };
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -246,12 +328,75 @@ export default function InboxPage() {
     });
   }, [loadInboxData]);
 
+  const handleNewConversation = useCallback(
+    (conversation: Conversation) => {
+      setConversations((prevConversations) => {
+        const updated = [...prevConversations];
+        updated.unshift(conversation);
+        return updated;
+      });
+    },
+    []
+  );
+
+  const handleConversationUpdated = useCallback(
+    (conversation: Conversation) => {
+      setConversations((prevConversations) =>
+        prevConversations
+          .map((conv) => (conv.id === conversation.id ? conversation : conv))
+          .sort((a, b) => {
+            // Sort by last_message_at descending
+            const aTime = a.lastMessageAt ? new Date(a.lastMessageAt).getTime() : 0;
+            const bTime = b.lastMessageAt ? new Date(b.lastMessageAt).getTime() : 0;
+            return bTime - aTime;
+          })
+      );
+    },
+    []
+  );
+
+  const handleNewNotification = useCallback(
+    (notification: Notification) => {
+      setNotifications((prevNotifications) => [notification, ...prevNotifications]);
+    },
+    []
+  );
+
+  const handleNotificationUpdated = useCallback(
+    (notification: Notification) => {
+      setNotifications((prevNotifications) =>
+        prevNotifications.map((notif) => (notif.id === notification.id ? notification : notif))
+      );
+    },
+    []
+  );
+
+  // Real-time subscriptions (hooks called at top level)
+  useRealtimeConversations(userId, handleNewConversation, handleConversationUpdated);
+  useRealtimeNotifications(userId, handleNewNotification, handleNotificationUpdated);
+
   const acceptRequest = async (requestId: string) => {
     setActionLoadingRequestId(requestId);
     setError(null);
 
     try {
       const supabase = createSupabaseBrowserClient();
+      const { data: authData } = await supabase.auth.getUser();
+
+      if (!authData.user?.id) {
+        throw new Error("Please sign in to accept requests.");
+      }
+
+      const request = pendingRequests.find((item) => item.id === requestId);
+      if (!request) {
+        throw new Error("Request not found.");
+      }
+
+      const [currentUserSummary] = await Promise.all([
+        getUserSummary(supabase, authData.user.id),
+      ]);
+
+      const acceptedAt = new Date().toISOString();
       const { error: updateError } = await supabase
         .from("connection_requests")
         .update({ status: "accepted", accepted_at: new Date().toISOString() })
@@ -260,6 +405,35 @@ export default function InboxPage() {
 
       if (updateError) {
         throw updateError;
+      }
+
+      const welcomeMessage = "Connection accepted. Say hello to start the conversation.";
+
+      await ensureConversationSnapshot(
+        supabase,
+        authData.user.id,
+        request.businessName,
+        welcomeMessage,
+        acceptedAt,
+      );
+
+      await ensureConversationSnapshot(
+        supabase,
+        request.requesterId,
+        currentUserSummary.businessName,
+        welcomeMessage,
+        acceptedAt,
+      );
+
+      const { error: notificationError } = await supabase.from("notifications").insert({
+        profile_id: request.requesterId,
+        title: "Connection accepted",
+        detail: `${currentUserSummary.businessName} accepted your connection request.`,
+        is_read: false,
+      });
+
+      if (notificationError) {
+        throw notificationError;
       }
 
       await loadInboxData();
@@ -367,7 +541,7 @@ export default function InboxPage() {
       ) : null}
       <InboxColumns
         notifications={notifications}
-        messages={messages}
+        conversations={conversations}
         connectionRequests={pendingRequests}
         onMarkNotificationRead={markNotificationRead}
         onDismissNotification={dismissNotification}

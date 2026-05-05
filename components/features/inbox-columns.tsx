@@ -1,5 +1,6 @@
 import Link from "next/link";
-import type { Message, Notification } from "@/lib/types/message";
+import { ConversationList } from "@/components/features/conversation-list";
+import type { Conversation, Notification } from "@/lib/types/message";
 
 type PendingConnectionRequest = {
   id: string;
@@ -12,7 +13,7 @@ type PendingConnectionRequest = {
 
 type InboxColumnsProps = {
   notifications: Notification[];
-  messages: Message[];
+  conversations: Conversation[];
   connectionRequests?: PendingConnectionRequest[];
   onMarkNotificationRead?: (notificationId: string) => void | Promise<void>;
   onDismissNotification?: (notificationId: string) => void | Promise<void>;
@@ -24,7 +25,7 @@ type InboxColumnsProps = {
 
 export function InboxColumns({
   notifications,
-  messages,
+  conversations,
   connectionRequests = [],
   onMarkNotificationRead,
   onDismissNotification,
@@ -146,32 +147,10 @@ export function InboxColumns({
       </section>
 
       <section className="rounded-panel border-border-subtle bg-surface border p-4">
-        <h2 className="text-foreground text-lg font-semibold">Messages</h2>
-        {messages.length === 0 ? (
-          <p className="text-text-muted mt-3 text-sm">No recent messages yet.</p>
-        ) : (
-          <ul className="mt-3 space-y-2">
-            {messages.map((message) => (
-              <li
-                key={message.id}
-                className={`rounded-chip border p-3 ${message.isUnread ? "border-brand/30 bg-brand/5" : "border-border-subtle bg-surface-muted"}`}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="font-medium">{message.senderName}</p>
-                    <p className="text-text-muted text-sm">{message.preview}</p>
-                  </div>
-                  <span className="text-text-muted shrink-0 text-xs">{message.sentAt}</span>
-                </div>
-                {message.isUnread ? (
-                  <span className="text-brand mt-2 inline-flex rounded-full bg-brand/10 px-2 py-1 text-xs font-medium">
-                    Unread
-                  </span>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-        )}
+        <h2 className="text-foreground text-lg font-semibold">Conversations</h2>
+        <div className="mt-3">
+          <ConversationList conversations={conversations} />
+        </div>
       </section>
     </div>
   );

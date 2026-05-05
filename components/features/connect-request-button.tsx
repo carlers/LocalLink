@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { routes } from "@/lib/constants/routes";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { BusinessConnectionState } from "@/lib/types/connection";
 
@@ -172,15 +173,23 @@ export function ConnectRequestButton({ receiverOwnerId }: ConnectRequestButtonPr
     }
 
     return (
-      <button
-        className="rounded-full border border-border-subtle bg-surface-muted px-6 py-2 font-medium text-foreground transition hover:bg-surface"
-        type="button"
-        onClick={() => {
-          setConfirmDisconnect(true);
-        }}
-      >
-        Connected
-      </button>
+      <div className="flex flex-wrap gap-2 sm:flex-nowrap">
+        <Link
+          href={routes.inbox}
+          className="rounded-full border border-brand bg-brand px-6 py-2 font-semibold text-white transition hover:bg-teal-700"
+        >
+          Open inbox
+        </Link>
+        <button
+          className="rounded-full border border-border-subtle bg-surface-muted px-6 py-2 font-medium text-foreground transition hover:bg-surface"
+          type="button"
+          onClick={() => {
+            setConfirmDisconnect(true);
+          }}
+        >
+          Connected
+        </button>
+      </div>
     );
   }
 

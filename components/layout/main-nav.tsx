@@ -5,12 +5,14 @@ import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { mainNavItems, routes } from "@/lib/constants/routes";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { useInboxBadgeCount } from "@/lib/hooks/useInboxBadgeCount";
 
 export function MainNav() {
   const [userPresent, setUserPresent] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [inboxBadgeCount, setInboxBadgeCount] = useState(0);
+  const [userId, setUserId] = useState<string | null>(null);
+  const inboxBadgeCount = useInboxBadgeCount(userId);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
 
@@ -21,32 +23,8 @@ export function MainNav() {
     supabase.auth.getUser().then(({ data }) => {
       if (!mounted) return;
       setUserPresent(Boolean(data.user));
+      setUserId(data.user?.id ?? null);
     });
-
-    async function loadInboxBadge() {
-      const { data } = await supabase.auth.getUser();
-
-      if (!mounted || !data.user?.id) {
-        setInboxBadgeCount(0);
-        return;
-      }
-
-      const userId = data.user.id;
-      const [notificationCountResult, requestCountResult] = await Promise.all([
-        supabase.from("notifications").select("id", { count: "exact", head: true }).eq("profile_id", userId).eq("is_read", false),
-        supabase.from("connection_requests").select("id", { count: "exact", head: true }).eq("receiver_id", userId).eq("status", "pending"),
-      ]);
-
-      if (!mounted) {
-        return;
-      }
-
-      const unreadNotifications = notificationCountResult.count ?? 0;
-      const pendingRequests = requestCountResult.count ?? 0;
-      setInboxBadgeCount(unreadNotifications + pendingRequests);
-    }
-
-    void loadInboxBadge();
 
     function onDoc(e: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {

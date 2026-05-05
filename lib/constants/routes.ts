@@ -3,6 +3,7 @@ export const routes = {
   home: "/home",
   discover: "/discover",
   inbox: "/inbox",
+  inboxConversation: (conversationId: string) => `/inbox/${conversationId}`,
   profile: "/profile",
   login: "/login",
   signup: "/signup",
