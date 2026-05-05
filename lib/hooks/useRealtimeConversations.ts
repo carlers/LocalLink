@@ -34,7 +34,7 @@ export function useRealtimeConversations(
             id: payload.new.id,
             partnerName: payload.new.partner_name,
             lastMessagePreview: payload.new.last_message_preview,
-            lastMessageAt: payload.new.last_message_at ? new Date(payload.new.last_message_at) : null,
+            lastMessageAt: payload.new.last_message_at,
             unreadCount: 0,
           };
           onNewConversation(newConversation);
@@ -58,7 +58,7 @@ export function useRealtimeConversations(
             id: payload.new.id,
             partnerName: payload.new.partner_name,
             lastMessagePreview: payload.new.last_message_preview,
-            lastMessageAt: payload.new.last_message_at ? new Date(payload.new.last_message_at) : null,
+            lastMessageAt: payload.new.last_message_at,
             unreadCount: 0,
           };
           onConversationUpdated(updatedConversation);

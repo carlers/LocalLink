@@ -43,7 +43,9 @@ export function useInboxBadgeCount(userId: string | null): number {
 
   // Initial load
   useEffect(() => {
-    void loadBadgeCountAsync();
+    queueMicrotask(() => {
+      void loadBadgeCountAsync();
+    });
   }, [loadBadgeCountAsync]);
 
   // Real-time subscription for notifications

@@ -35,7 +35,7 @@ export function useRealtimeMessages(
             conversationId: payload.new.conversation_id,
             senderName: payload.new.sender_name,
             preview: payload.new.preview,
-            sentAt: new Date(payload.new.sent_at),
+            sentAt: payload.new.sent_at,
             isUnread: payload.new.is_unread,
           };
           onNewMessage(newMessage);
@@ -60,7 +60,7 @@ export function useRealtimeMessages(
             conversationId: payload.new.conversation_id,
             senderName: payload.new.sender_name,
             preview: payload.new.preview,
-            sentAt: new Date(payload.new.sent_at),
+            sentAt: payload.new.sent_at,
             isUnread: payload.new.is_unread,
           };
           onMessageUpdated(updatedMessage);
