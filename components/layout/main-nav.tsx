@@ -22,9 +22,10 @@ export function MainNav() {
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
-
     let mounted = true;
-    supabase.auth.getUser().then(({ data }) => {
+
+    async function fetchUser() {
+      const { data } = await supabase.auth.getUser();
       if (!mounted) return;
       const nextUserId = data.user?.id ?? null;
       setUserPresent(Boolean(data.user));
@@ -35,20 +36,21 @@ export function MainNav() {
         return;
       }
 
-      supabase
-        .from("profiles")
-        .select("profile_image_url")
-        .eq("id", nextUserId)
-        .maybeSingle()
-        .then(({ data: profileData }) => {
-          if (!mounted) return;
-          setProfileImageUrl(profileData?.profile_image_url ?? null);
-        })
-        .catch(() => {
-          if (!mounted) return;
-          setProfileImageUrl(null);
-        });
-    });
+      try {
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("profile_image_url")
+          .eq("id", nextUserId)
+          .maybeSingle();
+        if (!mounted) return;
+        setProfileImageUrl(profileData?.profile_image_url ?? null);
+      } catch {
+        if (!mounted) return;
+        setProfileImageUrl(null);
+      }
+    }
+
+    fetchUser();
 
     function onDoc(e: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
