@@ -14,18 +14,24 @@ type InboxColumnsProps = {
   notifications: Notification[];
   messages: Message[];
   connectionRequests?: PendingConnectionRequest[];
+  onMarkNotificationRead?: (notificationId: string) => void | Promise<void>;
+  onDismissNotification?: (notificationId: string) => void | Promise<void>;
   onAcceptRequest?: (requestId: string) => void | Promise<void>;
   onRejectRequest?: (requestId: string) => void | Promise<void>;
   actionLoadingRequestId?: string | null;
+  notificationActionLoadingId?: string | null;
 };
 
 export function InboxColumns({
   notifications,
   messages,
   connectionRequests = [],
+  onMarkNotificationRead,
+  onDismissNotification,
   onAcceptRequest,
   onRejectRequest,
   actionLoadingRequestId,
+  notificationActionLoadingId,
 }: InboxColumnsProps) {
   return (
     <div className="grid gap-4 md:grid-cols-2">
@@ -86,26 +92,86 @@ export function InboxColumns({
 
       <section className="rounded-panel border-border-subtle bg-surface border p-4">
         <h2 className="text-foreground text-lg font-semibold">Notifications</h2>
-        <ul className="mt-3 space-y-2">
-          {notifications.map((notification) => (
-            <li key={notification.id} className="rounded-chip bg-surface-muted p-3">
-              <p className="font-medium">{notification.title}</p>
-              <p className="text-text-muted text-sm">{notification.detail}</p>
-            </li>
-          ))}
-        </ul>
+        {notifications.length === 0 ? (
+          <p className="text-text-muted mt-3 text-sm">No notifications yet.</p>
+        ) : (
+          <ul className="mt-3 space-y-2">
+            {notifications.map((notification) => (
+              <li
+                key={notification.id}
+                className={`rounded-chip border p-3 ${notification.isRead ? "border-border-subtle bg-surface-muted" : "border-brand/30 bg-brand/5"}`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="font-medium">{notification.title}</p>
+                    <p className="text-text-muted text-sm">{notification.detail}</p>
+                  </div>
+                  <span className="text-text-muted shrink-0 text-xs">{notification.createdAt}</span>
+                </div>
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  {!notification.isRead ? (
+                    <span className="text-brand inline-flex rounded-full bg-brand/10 px-2 py-1 text-xs font-medium">
+                      Unread
+                    </span>
+                  ) : null}
+                  {onMarkNotificationRead && !notification.isRead ? (
+                    <button
+                      type="button"
+                      className="text-brand rounded-full border border-brand/30 px-3 py-1 text-xs font-medium transition hover:bg-brand/10 disabled:cursor-not-allowed disabled:opacity-70"
+                      disabled={notificationActionLoadingId === notification.id}
+                      onClick={() => {
+                        void onMarkNotificationRead(notification.id);
+                      }}
+                    >
+                      {notificationActionLoadingId === notification.id ? "Updating..." : "Mark read"}
+                    </button>
+                  ) : null}
+                  {onDismissNotification ? (
+                    <button
+                      type="button"
+                      className="rounded-full border border-border-subtle px-3 py-1 text-xs font-medium text-foreground transition hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-70"
+                      disabled={notificationActionLoadingId === notification.id}
+                      onClick={() => {
+                        void onDismissNotification(notification.id);
+                      }}
+                    >
+                      {notificationActionLoadingId === notification.id ? "Updating..." : "Dismiss"}
+                    </button>
+                  ) : null}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       <section className="rounded-panel border-border-subtle bg-surface border p-4">
         <h2 className="text-foreground text-lg font-semibold">Messages</h2>
-        <ul className="mt-3 space-y-2">
-          {messages.map((message) => (
-            <li key={message.id} className="rounded-chip bg-surface-muted p-3">
-              <p className="font-medium">{message.senderName}</p>
-              <p className="text-text-muted text-sm">{message.preview}</p>
-            </li>
-          ))}
-        </ul>
+        {messages.length === 0 ? (
+          <p className="text-text-muted mt-3 text-sm">No recent messages yet.</p>
+        ) : (
+          <ul className="mt-3 space-y-2">
+            {messages.map((message) => (
+              <li
+                key={message.id}
+                className={`rounded-chip border p-3 ${message.isUnread ? "border-brand/30 bg-brand/5" : "border-border-subtle bg-surface-muted"}`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="font-medium">{message.senderName}</p>
+                    <p className="text-text-muted text-sm">{message.preview}</p>
+                  </div>
+                  <span className="text-text-muted shrink-0 text-xs">{message.sentAt}</span>
+                </div>
+                {message.isUnread ? (
+                  <span className="text-brand mt-2 inline-flex rounded-full bg-brand/10 px-2 py-1 text-xs font-medium">
+                    Unread
+                  </span>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
     </div>
   );

@@ -10,6 +10,7 @@ export function MainNav() {
   const [userPresent, setUserPresent] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [inboxBadgeCount, setInboxBadgeCount] = useState(0);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
 
@@ -21,6 +22,31 @@ export function MainNav() {
       if (!mounted) return;
       setUserPresent(Boolean(data.user));
     });
+
+    async function loadInboxBadge() {
+      const { data } = await supabase.auth.getUser();
+
+      if (!mounted || !data.user?.id) {
+        setInboxBadgeCount(0);
+        return;
+      }
+
+      const userId = data.user.id;
+      const [notificationCountResult, requestCountResult] = await Promise.all([
+        supabase.from("notifications").select("id", { count: "exact", head: true }).eq("profile_id", userId).eq("is_read", false),
+        supabase.from("connection_requests").select("id", { count: "exact", head: true }).eq("receiver_id", userId).eq("status", "pending"),
+      ]);
+
+      if (!mounted) {
+        return;
+      }
+
+      const unreadNotifications = notificationCountResult.count ?? 0;
+      const pendingRequests = requestCountResult.count ?? 0;
+      setInboxBadgeCount(unreadNotifications + pendingRequests);
+    }
+
+    void loadInboxBadge();
 
     function onDoc(e: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
@@ -56,7 +82,14 @@ export function MainNav() {
                   href={item.href}
                   className="text-text-muted hover:bg-surface-muted hover:text-foreground rounded-chip px-3 py-2 text-sm font-medium"
                 >
-                  {item.label}
+                  <span className="inline-flex items-center gap-2">
+                    <span>{item.label}</span>
+                    {item.href === routes.inbox && inboxBadgeCount > 0 ? (
+                      <span className="bg-brand text-white inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold leading-none">
+                        {inboxBadgeCount > 99 ? "99+" : inboxBadgeCount}
+                      </span>
+                    ) : null}
+                  </span>
                 </Link>
               </li>
             ))}
@@ -120,7 +153,14 @@ export function MainNav() {
                   onClick={() => setMobileOpen(false)}
                   className="text-text-muted hover:bg-surface-muted hover:text-foreground block rounded-chip px-3 py-3 text-sm font-medium"
                 >
-                  {item.label}
+                  <span className="flex items-center justify-between gap-3">
+                    <span>{item.label}</span>
+                    {item.href === routes.inbox && inboxBadgeCount > 0 ? (
+                      <span className="bg-brand text-white inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold leading-none">
+                        {inboxBadgeCount > 99 ? "99+" : inboxBadgeCount}
+                      </span>
+                    ) : null}
+                  </span>
                 </Link>
               </li>
             ))}
