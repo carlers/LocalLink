@@ -24,7 +24,7 @@ export default function DiscoverPage() {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [connectionStates, setConnectionStates] = useState<Record<string, BusinessConnectionState>>({});
   const [connectLoadingBusinessId, setConnectLoadingBusinessId] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<"list" | "map">("list");
+  const [viewMode, setViewMode] = useState<"list" | "map">("map");
   const [userLocation, setUserLocation] = useState<string>("manila");
 
   const hydrateConnectionStates = async (
@@ -290,8 +290,8 @@ export default function DiscoverPage() {
                 type="button"
                 onClick={() => setViewMode("list")}
                 className={`rounded-chip px-4 py-2 text-sm font-medium transition ${viewMode === "list"
-                    ? "bg-brand text-white"
-                    : "border-border-subtle border bg-surface text-foreground hover:bg-surface-muted"
+                  ? "bg-brand text-white"
+                  : "border-border-subtle border bg-surface text-foreground hover:bg-surface-muted"
                   }`}
               >
                 List view
@@ -300,8 +300,8 @@ export default function DiscoverPage() {
                 type="button"
                 onClick={() => setViewMode("map")}
                 className={`rounded-chip px-4 py-2 text-sm font-medium transition ${viewMode === "map"
-                    ? "bg-brand text-white"
-                    : "border-border-subtle border bg-surface text-foreground hover:bg-surface-muted"
+                  ? "bg-brand text-white"
+                  : "border-border-subtle border bg-surface text-foreground hover:bg-surface-muted"
                   }`}
               >
                 Map view
