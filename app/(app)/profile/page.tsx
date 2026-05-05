@@ -13,6 +13,7 @@ type ProfileRow = {
   location: string;
   trust_score: number;
   connections: number;
+  profile_image_url?: string | null;
 };
 
 type ConnectionRequestRow = {
@@ -47,7 +48,9 @@ export default function ProfilePage() {
     const currentUserId = userData.user.id;
     const { data: profileRowData } = await supabase
       .from("profiles")
-      .select("id, owner_name, business_name, location, trust_score, connections")
+      .select(
+        "id, owner_name, business_name, location, trust_score, connections, profile_image_url"
+      )
       .eq("id", currentUserId)
       .maybeSingle();
 
@@ -125,6 +128,7 @@ export default function ProfilePage() {
       connections: connectionRows.length,
       inventory: [],
       connectedBusinesses,
+      profileImageUrl: profileRow?.profile_image_url ?? null,
     });
   };
 

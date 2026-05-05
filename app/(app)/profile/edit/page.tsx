@@ -1,12 +1,12 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { SectionCard } from "@/components/ui/section-card";
-import type { Business, BusinessCategory } from "@/lib/types/business";
-import type { Profile } from "@/lib/types/profile";
+import type { BusinessCategory } from "@/lib/types/business";
 
 type FormState = {
   ownerName: string;
@@ -41,6 +41,11 @@ export default function EditProfilePage() {
   });
 
   // Image state
+  const profileBucketName =
+    process.env.NEXT_PUBLIC_PROFILE_IMAGES_BUCKET ?? "profile-images";
+  const businessBucketName =
+    process.env.NEXT_PUBLIC_BUSINESS_IMAGES_BUCKET ?? "business-images";
+
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
   const [profileImagePreview, setProfileImagePreview] = useState<string | null>(
     null
@@ -195,6 +200,26 @@ export default function EditProfilePage() {
   };
 
   // Upload image to Supabase Storage
+  const ensureBucketExists = async (bucketName: string) => {
+    const response = await fetch("/api/storage/ensure", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ bucket: bucketName }),
+    });
+
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      throw new Error(
+        body?.error || "Could not ensure storage bucket exists."
+      );
+    }
+  };
+
+  const getBucketName = (bucket: "profile-images" | "business-images") =>
+    bucket === "profile-images" ? profileBucketName : businessBucketName;
+
   const uploadImage = async (
     file: File,
     bucket: "profile-images" | "business-images",
@@ -207,16 +232,29 @@ export default function EditProfilePage() {
         ? `avatar.${ext}`
         : `hero.${ext}`;
     const filePath = `${userId}/${fileName}`;
+    const uploadBucket = getBucketName(bucket);
 
-    const { error: uploadError } = await supabase.storage
-      .from(bucket)
-      .upload(filePath, file, { upsert: true });
+    const tryUpload = async () => {
+      const { error: uploadError } = await supabase.storage
+        .from(uploadBucket)
+        .upload(filePath, file, { upsert: true });
+
+      return uploadError;
+    };
+
+    let uploadError = await tryUpload();
+    if (
+      uploadError &&
+      uploadError.message?.toLowerCase().includes("bucket not found")
+    ) {
+      await ensureBucketExists(uploadBucket);
+      uploadError = await tryUpload();
+    }
 
     if (uploadError) throw uploadError;
 
-    // Generate public URL
     const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const publicUrl = `${baseUrl}/storage/v1/object/public/${bucket}/${filePath}`;
+    const publicUrl = `${baseUrl}/storage/v1/object/public/${uploadBucket}/${filePath}`;
     return publicUrl;
   };
 
@@ -259,6 +297,7 @@ export default function EditProfilePage() {
         .from("profiles")
         .update({
           owner_name: formData.ownerName,
+          business_name: formData.businessName,
           location: formData.location,
           profile_image_url: profileImageUrl,
           updated_at: new Date().toISOString(),
@@ -267,20 +306,22 @@ export default function EditProfilePage() {
 
       if (profileError) throw profileError;
 
-      // Update or create business
       const { error: businessError } = await supabase
         .from("businesses")
-        .update({
-          name: formData.businessName,
-          location: formData.location,
-          category: formData.category,
-          short_description: formData.shortDescription,
-          is_dti_registered: formData.isDtiRegistered,
-          is_barter_friendly: formData.isBarterFriendly,
-          has_urgent_need: formData.hasUrgentNeed,
-          image_url: businessImageUrl,
-        })
-        .eq("owner_id", userId);
+        .upsert(
+          {
+            owner_id: userId,
+            name: formData.businessName,
+            location: formData.location,
+            category: formData.category,
+            short_description: formData.shortDescription,
+            is_dti_registered: formData.isDtiRegistered,
+            is_barter_friendly: formData.isBarterFriendly,
+            has_urgent_need: formData.hasUrgentNeed,
+            image_url: businessImageUrl,
+          },
+          { onConflict: "owner_id" }
+        );
 
       if (businessError) throw businessError;
 
@@ -302,8 +343,7 @@ export default function EditProfilePage() {
   };
 
   // Confirm delete profile
-  const handleConfirmDelete = async (event: React.FormEvent) => {
-    event.preventDefault();
+  const handleConfirmDelete = async () => {
     if (!userId || !deletePassword) {
       setError("Password is required");
       return;
@@ -321,11 +361,10 @@ export default function EditProfilePage() {
       }
 
       // Re-authenticate user
-      const { error: authError } =
-        await supabase.auth.signInWithPassword(
-          userData.user.email,
-          deletePassword
-        );
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email: userData.user.email,
+        password: deletePassword,
+      });
 
       if (authError) {
         setError("Invalid password. Account not deleted.");
@@ -336,14 +375,14 @@ export default function EditProfilePage() {
       // Delete profile images from storage
       if (currentProfileImageUrl) {
         await supabase.storage
-          .from("profile-images")
+          .from(profileBucketName)
           .remove([`${userId}/avatar.jpg`]);
       }
 
       // Delete business images from storage
       if (currentBusinessImageUrl) {
         await supabase.storage
-          .from("business-images")
+          .from(businessBucketName)
           .remove([`${userId}/hero.jpg`]);
       }
 
@@ -585,16 +624,21 @@ export default function EditProfilePage() {
           <div className="space-y-4">
             {profileImagePreview && (
               <div className="flex flex-col gap-3">
-                <img
-                  src={profileImagePreview}
-                  alt="Profile preview"
-                  className="h-32 w-32 rounded-full object-cover"
-                />
+                <div className="relative h-32 w-32 overflow-hidden rounded-full">
+                  <Image
+                    src={profileImagePreview}
+                    alt="Profile preview"
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                </div>
                 <button
                   type="button"
                   onClick={() => {
                     setProfileImageFile(null);
                     setProfileImagePreview(null);
+                    setCurrentProfileImageUrl(null);
                   }}
                   className="w-fit text-sm text-brand underline hover:no-underline"
                 >
@@ -629,16 +673,21 @@ export default function EditProfilePage() {
           <div className="space-y-4">
             {businessImagePreview && (
               <div className="flex flex-col gap-3">
-                <img
-                  src={businessImagePreview}
-                  alt="Business preview"
-                  className="h-40 w-full rounded-panel object-cover"
-                />
+                <div className="relative h-40 w-full overflow-hidden rounded-panel">
+                  <Image
+                    src={businessImagePreview}
+                    alt="Business preview"
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                </div>
                 <button
                   type="button"
                   onClick={() => {
                     setBusinessImageFile(null);
                     setBusinessImagePreview(null);
+                    setCurrentBusinessImageUrl(null);
                   }}
                   className="w-fit text-sm text-brand underline hover:no-underline"
                 >
@@ -680,10 +729,7 @@ export default function EditProfilePage() {
                 Delete account
               </button>
             ) : (
-              <form
-                onSubmit={handleConfirmDelete}
-                className="space-y-4 rounded-panel border-border-subtle bg-surface-muted border p-4"
-              >
+              <div className="space-y-4 rounded-panel border-border-subtle bg-surface-muted border p-4">
                 <p className="text-sm font-semibold">
                   Enter your password to confirm deletion. This action cannot be
                   undone.
@@ -698,9 +744,10 @@ export default function EditProfilePage() {
                   required
                 />
 
-                <div className="flex gap-2">
+                <div className="flex flex-col gap-2 sm:flex-row">
                   <button
-                    type="submit"
+                    type="button"
+                    onClick={handleConfirmDelete}
                     disabled={isDeleting}
                     className="rounded-chip border border-red-600 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-100 disabled:opacity-50"
                   >
@@ -714,7 +761,7 @@ export default function EditProfilePage() {
                     Cancel
                   </button>
                 </div>
-              </form>
+              </div>
             )}
           </div>
         </SectionCard>

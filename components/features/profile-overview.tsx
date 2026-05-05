@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { Profile } from "@/lib/types/profile";
 
 type ProfileOverviewProps = {
@@ -13,64 +14,118 @@ export function ProfileOverview({
 }: ProfileOverviewProps) {
   if (!profile) {
     return (
-      <div className="rounded-panel border-border-subtle bg-surface border p-4">
+      <div className="rounded-panel border-border-subtle bg-surface border p-6">
         <h2 className="text-foreground text-lg font-semibold">Profile</h2>
-        <p className="text-text-muted mt-2 text-sm">No profile data available.</p>
+        <p className="text-text-muted mt-3 text-sm">No profile data available yet.</p>
       </div>
     );
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2">
-      <section className="rounded-panel border-border-subtle bg-surface border p-4">
-        <h2 className="text-foreground text-lg font-semibold">Business Identity</h2>
-        <p className="text-text-muted mt-2 text-sm">Owner: {profile.ownerName}</p>
-        <p className="text-text-muted text-sm">Business: {profile.businessName}</p>
-        <p className="text-text-muted text-sm">Location: {profile.location}</p>
+    <div className="space-y-6">
+      <section className="rounded-panel border-border-subtle bg-surface border p-6 shadow-sm shadow-surface-muted/50">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+          <div className="relative flex h-28 w-28 items-center justify-center overflow-hidden rounded-full bg-surface-muted text-3xl font-semibold text-brand sm:h-32 sm:w-32">
+            {profile.profileImageUrl ? (
+              <Image
+                src={profile.profileImageUrl}
+                alt={profile.ownerName}
+                fill
+                className="rounded-full object-cover"
+                unoptimized
+              />
+            ) : (
+              <span className="text-3xl font-semibold">
+                {profile.ownerName
+                  .split(" ")
+                  .map((part) => part.slice(0, 1).toUpperCase())
+                  .join("")}
+              </span>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <p className="text-xs uppercase tracking-[0.24em] text-text-muted">Your business profile</p>
+            <h2 className="text-2xl font-semibold text-foreground">{profile.businessName}</h2>
+            <p className="text-sm text-text-muted">Owned by {profile.ownerName}</p>
+            <p className="text-sm text-text-muted">{profile.location}</p>
+            <div className="flex flex-wrap gap-2 pt-3">
+              <span className="rounded-full bg-brand/10 px-3 py-1 text-xs font-semibold text-brand">
+                Trust Score {profile.trustScore}
+              </span>
+              <span className="rounded-full bg-surface-muted px-3 py-1 text-xs font-medium text-foreground">
+                {profile.connections} Connections
+              </span>
+            </div>
+          </div>
+        </div>
       </section>
 
-      <section className="rounded-panel border-border-subtle bg-surface border p-4">
-        <h2 className="text-foreground text-lg font-semibold">Trust And Network</h2>
-        <p className="text-text-muted mt-2 text-sm">Trust score: {profile.trustScore}</p>
-        <p className="text-text-muted text-sm">Connections: {profile.connections}</p>
-      </section>
+      <div className="grid gap-4 xl:grid-cols-[1.4fr_0.8fr]">
+        <section className="rounded-panel border-border-subtle bg-surface border p-6">
+          <h3 className="text-lg font-semibold text-foreground">Inventory Snapshot</h3>
+          {profile.inventory.length === 0 ? (
+            <p className="mt-3 text-sm text-text-muted">No inventory items yet. Add items to make your profile more discoverable.</p>
+          ) : (
+            <ul className="mt-4 grid gap-3 md:grid-cols-2">
+              {profile.inventory.map((item) => (
+                <li key={item.id} className="rounded-panel border-border-subtle bg-surface-muted border p-4">
+                  <p className="font-semibold text-foreground">{item.name}</p>
+                  <p className="mt-1 text-sm text-text-muted">{item.quantity}</p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
 
-      <section className="rounded-panel border-border-subtle bg-surface border p-4 md:col-span-2">
-        <h2 className="text-foreground text-lg font-semibold">Inventory Snapshot</h2>
-        {profile.inventory.length === 0 ? (
-          <p className="text-text-muted mt-3 text-sm">No inventory items yet.</p>
-        ) : (
-          <ul className="mt-3 grid gap-2 md:grid-cols-2">
-            {profile.inventory.map((item) => (
-              <li key={item.id} className="rounded-chip bg-surface-muted p-3 text-sm">
-                <p className="font-medium">{item.name}</p>
-                <p className="text-text-muted">{item.quantity}</p>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+        <section className="rounded-panel border-border-subtle bg-surface border p-6">
+          <h3 className="text-lg font-semibold text-foreground">Trust & Network</h3>
+          <p className="mt-3 text-sm text-text-muted">A stronger trust score helps local buyers choose your business.</p>
+          <div className="mt-4">
+            <div className="h-2 overflow-hidden rounded-full bg-surface-muted">
+              <div
+                className="h-full rounded-full bg-brand"
+                style={{ width: `${Math.min(profile.trustScore, 100)}%` }}
+              />
+            </div>
+            <div className="mt-3 flex items-center justify-between text-sm text-text-muted">
+              <span>Trust score</span>
+              <span>{profile.trustScore}%</span>
+            </div>
+          </div>
 
-      <section className="rounded-panel border-border-subtle bg-surface border p-4 md:col-span-2">
-        <h2 className="text-foreground text-lg font-semibold">Connected Businesses</h2>
+          <div className="mt-6 space-y-3">
+            <div className="rounded-panel border-border-subtle bg-surface-muted border p-4">
+              <p className="text-sm font-medium text-foreground">Connected businesses</p>
+              <p className="mt-1 text-sm text-text-muted">{profile.connectedBusinesses.length} trusted partners</p>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <section className="rounded-panel border-border-subtle bg-surface border p-6">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h3 className="text-lg font-semibold text-foreground">Connected Businesses</h3>
+            <p className="mt-1 text-sm text-text-muted">Manage partner relationships from one place.</p>
+          </div>
+        </div>
+
         {profile.connectedBusinesses.length === 0 ? (
-          <p className="text-text-muted mt-3 text-sm">No connected businesses yet.</p>
+          <p className="mt-4 text-sm text-text-muted">No connected businesses yet. Use Discover to find nearby partners.</p>
         ) : (
-          <ul className="mt-3 grid gap-2 md:grid-cols-2">
+          <ul className="mt-4 grid gap-3 sm:grid-cols-2">
             {profile.connectedBusinesses.map((connectedBusiness) => (
-              <li key={connectedBusiness.id} className="rounded-chip bg-surface-muted p-3 text-sm">
-                <p className="font-medium">{connectedBusiness.businessName}</p>
-                <p className="text-text-muted">Owner: {connectedBusiness.ownerName}</p>
-                <p className="text-text-muted">Location: {connectedBusiness.location}</p>
+              <li key={connectedBusiness.id} className="rounded-panel border-border-subtle bg-surface-muted border p-4">
+                <p className="font-semibold text-foreground">{connectedBusiness.businessName}</p>
+                <p className="mt-1 text-sm text-text-muted">Owner: {connectedBusiness.ownerName}</p>
+                <p className="text-sm text-text-muted">{connectedBusiness.location}</p>
                 <button
                   type="button"
-                  className="mt-3 rounded-full border border-border-subtle bg-surface px-3 py-1 text-xs font-medium text-foreground transition hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-70"
+                  className="mt-4 inline-flex rounded-full border border-border-subtle bg-surface px-3 py-1 text-xs font-medium text-foreground transition hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-70"
                   disabled={disconnectingOwnerId === connectedBusiness.ownerId}
                   onClick={() => {
-                    if (!onDisconnect) {
-                      return;
-                    }
-
+                    if (!onDisconnect) return;
                     void onDisconnect(connectedBusiness.ownerId);
                   }}
                 >
