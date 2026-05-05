@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
@@ -48,8 +49,16 @@ export function MainNav() {
   return (
     <header className="border-border-subtle bg-surface/95 border-b backdrop-blur">
       <nav className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
-        <Link href={routes.home} className="text-foreground text-lg font-semibold">
-          LocalLink
+        <Link href={routes.home} className="text-foreground inline-flex items-center gap-2 text-lg font-semibold">
+          <Image
+            src="/favicon_io/favicon-32x32.png"
+            alt="LocalLink"
+            width={28}
+            height={28}
+            className="h-7 w-7 shrink-0"
+            priority
+          />
+          <span>LocalLink</span>
         </Link>
 
         <div className="hidden items-center gap-3 md:flex">
