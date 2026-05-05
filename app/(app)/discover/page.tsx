@@ -89,7 +89,7 @@ export default function DiscoverPage() {
     <div className="space-y-4">
       <h1 className="text-2xl font-semibold">Discover Businesses</h1>
 
-      <SectionCard title="Search And Filters" description="Find businesses by location, category, and practical needs.">
+      <SectionCard title="Search And Filters" description={resultSummary}>
         <DiscoverSearch onFilter={fetchBusinesses} isLoading={isLoading} />
       </SectionCard>
 

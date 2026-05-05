@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import { DiscoverSearch } from "@/components/features/discover-search";
 import { BusinessList } from "@/components/features/business-list";
 import { SectionCard } from "@/components/ui/section-card";
 import type { Business } from "@/lib/types/business";
@@ -29,7 +28,7 @@ export default function HomePage() {
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [summary, setSummary] = useState("Search nearby businesses by name, category, or location.");
+  const [summary, setSummary] = useState("Suggested businesses near your area.");
   const [businessName, setBusinessName] = useState("Your business");
   const [ownerName, setOwnerName] = useState("Business owner");
   const [businessLocation, setBusinessLocation] = useState("Your area");
@@ -42,13 +41,11 @@ export default function HomePage() {
   ];
 
   const fetchBusinesses = async (
-    searchQuery = "",
-    category = "",
     location = ""
   ) => {
     setIsLoading(true);
     setError(null);
-    setSummary("Searching local businesses...");
+    setSummary(location ? `Loading businesses near ${location}...` : "Loading businesses across the network...");
 
     try {
       const supabase = createSupabaseBrowserClient();
@@ -58,14 +55,6 @@ export default function HomePage() {
           "id, name, location, category, is_dti_registered, is_barter_friendly, has_urgent_need, short_description"
         )
         .order("created_at", { ascending: false });
-
-      if (searchQuery) {
-        query = query.ilike("name", `%${searchQuery}%`);
-      }
-
-      if (category) {
-        query = query.eq("category", category);
-      }
 
       if (location) {
         query = query.ilike("location", `%${location}%`);
@@ -97,8 +86,10 @@ export default function HomePage() {
       });
       setSummary(
         formattedBusinesses.length > 0
-          ? `${formattedBusinesses.length} match${formattedBusinesses.length === 1 ? "" : "es"} found`
-          : "No businesses matched your search."
+          ? `${formattedBusinesses.length} match${formattedBusinesses.length === 1 ? "" : "es"} found${location ? ` near ${location}` : ""}`
+          : location
+            ? `No businesses found near ${location}.`
+            : "No businesses available yet."
       );
     } catch (fetchError) {
       const message = fetchError instanceof Error ? fetchError.message : "Unable to load businesses.";
@@ -111,7 +102,9 @@ export default function HomePage() {
   };
 
   useEffect(() => {
-    const loadUser = async () => {
+    const loadHome = async () => {
+      let location = "";
+
       try {
         const supabase = createSupabaseBrowserClient();
         const { data } = await supabase.auth.getUser();
@@ -126,14 +119,16 @@ export default function HomePage() {
           setOwnerName(metadata?.full_name ?? data.user.email ?? "Business owner");
           setBusinessName(metadata?.business_name ?? "Your business");
           setBusinessLocation(metadata?.location ?? "Your area");
+          location = metadata?.location ?? "";
         }
       } catch {
         // Keep defaults if user metadata is unavailable.
       }
+
+      await fetchBusinesses(location);
     };
 
-    void loadUser();
-    void fetchBusinesses();
+    void loadHome();
   }, []);
 
   return (
@@ -210,11 +205,7 @@ export default function HomePage() {
         </aside>
 
         <main className="space-y-6">
-          <SectionCard title="Search local offers" description="Filter by name, category, or location to find nearby partners quickly.">
-            <DiscoverSearch onFilter={fetchBusinesses} isLoading={isLoading} />
-          </SectionCard>
-
-          <SectionCard title="Live matches" description={summary}>
+          <SectionCard title="Nearby matches" description={summary}>
             {error ? (
               <div className="rounded-panel border-border-subtle bg-status-error-bg border border-status-error-fg p-4 text-sm text-status-error-fg">
                 {error}
