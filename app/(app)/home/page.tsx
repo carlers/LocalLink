@@ -1,24 +1,243 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { DiscoverSearch } from "@/components/features/discover-search";
+import { BusinessList } from "@/components/features/business-list";
 import { SectionCard } from "@/components/ui/section-card";
+import type { Business } from "@/lib/types/business";
+
+type Partner = {
+  name: string;
+  type: string;
+  logo: string;
+};
+
+type BusinessRow = {
+  id: string;
+  name: string;
+  location: string;
+  category: string;
+  is_dti_registered: boolean;
+  is_barter_friendly: boolean;
+  has_urgent_need: boolean;
+  short_description: string;
+};
 
 export default function HomePage() {
+  const [businesses, setBusinesses] = useState<Business[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [summary, setSummary] = useState("Search nearby businesses by name, category, or location.");
+  const [businessName, setBusinessName] = useState("Your business");
+  const [ownerName, setOwnerName] = useState("Business owner");
+  const [businessLocation, setBusinessLocation] = useState("Your area");
+  const [stats, setStats] = useState({ total: 0, urgent: 0, barter: 0 });
+
+  const trustedPartners: Partner[] = [
+    { name: "Aling Nena's Eatery", type: "Restaurant", logo: "🍳" },
+    { name: "Mang Tomas Sari-Sari Store", type: "Retail", logo: "🏪" },
+    { name: "Lola's Tailoring Shop", type: "Services", logo: "👗" },
+  ];
+
+  const fetchBusinesses = async (
+    searchQuery = "",
+    category = "",
+    location = ""
+  ) => {
+    setIsLoading(true);
+    setError(null);
+    setSummary("Searching local businesses...");
+
+    try {
+      const supabase = createSupabaseBrowserClient();
+      let query = supabase
+        .from("businesses")
+        .select(
+          "id, name, location, category, is_dti_registered, is_barter_friendly, has_urgent_need, short_description"
+        )
+        .order("created_at", { ascending: false });
+
+      if (searchQuery) {
+        query = query.ilike("name", `%${searchQuery}%`);
+      }
+
+      if (category) {
+        query = query.eq("category", category);
+      }
+
+      if (location) {
+        query = query.ilike("location", `%${location}%`);
+      }
+
+      const { data, error: fetchError } = await query;
+
+      if (fetchError) {
+        throw fetchError;
+      }
+
+      const rows = (data ?? []) as BusinessRow[];
+      const formattedBusinesses = rows.map((row) => ({
+        id: row.id,
+        name: row.name,
+        location: row.location,
+        category: row.category as Business["category"],
+        isDtiRegistered: row.is_dti_registered,
+        isBarterFriendly: row.is_barter_friendly,
+        hasUrgentNeed: row.has_urgent_need,
+        shortDescription: row.short_description,
+      }));
+
+      setBusinesses(formattedBusinesses);
+      setStats({
+        total: formattedBusinesses.length,
+        urgent: formattedBusinesses.filter((business) => business.hasUrgentNeed).length,
+        barter: formattedBusinesses.filter((business) => business.isBarterFriendly).length,
+      });
+      setSummary(
+        formattedBusinesses.length > 0
+          ? `${formattedBusinesses.length} match${formattedBusinesses.length === 1 ? "" : "es"} found`
+          : "No businesses matched your search."
+      );
+    } catch (fetchError) {
+      const message = fetchError instanceof Error ? fetchError.message : "Unable to load businesses.";
+      setError(message);
+      setBusinesses([]);
+      setSummary("Unable to load businesses right now.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const supabase = createSupabaseBrowserClient();
+        const { data } = await supabase.auth.getUser();
+
+        if (data.user) {
+          const metadata = data.user.user_metadata as {
+            full_name?: string;
+            business_name?: string;
+            location?: string;
+          } | null;
+
+          setOwnerName(metadata?.full_name ?? data.user.email ?? "Business owner");
+          setBusinessName(metadata?.business_name ?? "Your business");
+          setBusinessLocation(metadata?.location ?? "Your area");
+        }
+      } catch {
+        // Keep defaults if user metadata is unavailable.
+      }
+    };
+
+    void loadUser();
+    void fetchBusinesses();
+  }, []);
+
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">Welcome back, your business hub is ready.</h1>
+    <div className="space-y-6">
+      <section className="rounded-panel border-border-subtle bg-surface border p-6 shadow-sm shadow-surface-muted/40">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+          <div className="max-w-2xl">
+            <p className="text-sm uppercase tracking-[0.28em] text-brand">Home</p>
+            <h1 className="mt-2 text-3xl font-semibold tracking-tight">Welcome back, {ownerName}.</h1>
+            <p className="mt-3 text-text-muted sm:text-base">
+              Browse local suppliers, urgent needs, and barter-friendly partners near {businessLocation}.
+            </p>
+          </div>
 
-      <SectionCard title="Quick Actions" description="Start fast actions for your daily operations.">
-        <ul className="text-text-muted list-inside list-disc text-sm">
-          <li>Post a Need (placeholder)</li>
-          <li>Post an Offer (placeholder)</li>
-        </ul>
-      </SectionCard>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div className="rounded-chip bg-surface-muted p-4 text-sm">
+              <p className="text-text-muted">Matches</p>
+              <p className="mt-2 text-2xl font-semibold text-foreground">{stats.total}</p>
+            </div>
+            <div className="rounded-chip bg-surface-muted p-4 text-sm">
+              <p className="text-text-muted">Urgent needs</p>
+              <p className="mt-2 text-2xl font-semibold text-foreground">{stats.urgent}</p>
+            </div>
+            <div className="rounded-chip bg-surface-muted p-4 text-sm">
+              <p className="text-text-muted">Barter friendly</p>
+              <p className="mt-2 text-2xl font-semibold text-foreground">{stats.barter}</p>
+            </div>
+          </div>
+        </div>
+      </section>
 
-      <SectionCard title="Trusted Partners" description="Your trusted business connections appear here.">
-        <p className="text-text-muted text-sm">Partner list placeholder for upcoming data integration.</p>
-      </SectionCard>
+      <div className="grid gap-6 lg:grid-cols-[285px_1fr]">
+        <aside className="space-y-6">
+          <SectionCard title="Business summary">
+            <div className="space-y-4">
+              <div className="rounded-panel border-border-subtle bg-surface border p-4">
+                <p className="text-sm text-text-muted">Business</p>
+                <p className="mt-2 text-lg font-semibold text-foreground">{businessName}</p>
+                <p className="mt-1 text-sm text-text-muted">{businessLocation}</p>
+              </div>
 
-      <SectionCard title="Nearby Opportunities" description="Relevant opportunities near your area.">
-        <p className="text-text-muted text-sm">Nearby businesses and opportunities placeholder.</p>
-      </SectionCard>
+              <div className="rounded-panel border-border-subtle bg-surface border p-4">
+                <p className="text-sm text-text-muted">Quick actions</p>
+                <div className="mt-3 grid gap-3">
+                  <Link href="/discover" className="rounded-chip bg-brand px-4 py-2 text-sm font-semibold text-white text-center transition hover:bg-teal-700">
+                    Browse suppliers
+                  </Link>
+                  <Link href="/profile" className="rounded-chip border border-border-subtle bg-surface-muted px-4 py-2 text-sm font-medium text-foreground text-center transition hover:bg-surface">
+                    View profile
+                  </Link>
+                  <Link href="/inbox" className="rounded-chip border border-border-subtle bg-surface-muted px-4 py-2 text-sm font-medium text-foreground text-center transition hover:bg-surface">
+                    Check inbox
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </SectionCard>
+
+          <SectionCard title="Trusted partners" description="Local businesses already working with the network.">
+            <div className="space-y-3">
+              {trustedPartners.map((partner) => (
+                <div key={partner.name} className="flex items-center gap-3 rounded-panel border-border-subtle bg-surface border p-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-surface-muted text-xl">
+                    {partner.logo}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-foreground">{partner.name}</p>
+                    <p className="text-sm text-text-muted">{partner.type}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </SectionCard>
+        </aside>
+
+        <main className="space-y-6">
+          <SectionCard title="Search local offers" description="Filter by name, category, or location to find nearby partners quickly.">
+            <DiscoverSearch onFilter={fetchBusinesses} isLoading={isLoading} />
+          </SectionCard>
+
+          <SectionCard title="Live matches" description={summary}>
+            {error ? (
+              <div className="rounded-panel border-border-subtle bg-status-error-bg border border-status-error-fg p-4 text-sm text-status-error-fg">
+                {error}
+              </div>
+            ) : null}
+
+            {isLoading ? (
+              <div className="rounded-panel border-border-subtle bg-surface-muted border p-4 text-sm text-text-muted">
+                Loading businesses...
+              </div>
+            ) : null}
+
+            {!isLoading && businesses.length === 0 && !error ? (
+              <div className="rounded-panel border-border-subtle bg-surface-muted border p-4 text-sm text-text-muted">
+                No businesses available yet. Try broadening your search or updating your filters.
+              </div>
+            ) : null}
+
+            {!isLoading && businesses.length > 0 ? <BusinessList businesses={businesses} /> : null}
+          </SectionCard>
+        </main>
+      </div>
     </div>
   );
 }
+
