@@ -315,6 +315,12 @@ export default function ConversationPage() {
                 id="message-draft"
                 value={draft}
                 onChange={(event) => setDraft(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" && !event.shiftKey) {
+                    event.preventDefault();
+                    void sendMessage();
+                  }
+                }}
                 rows={4}
                 placeholder="Type your reply..."
                 className="border-border-subtle bg-background text-foreground mt-2 w-full rounded-2xl border px-4 py-3 text-sm outline-none transition placeholder:text-text-muted focus:border-brand"
