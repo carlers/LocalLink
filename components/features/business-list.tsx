@@ -44,15 +44,15 @@ export function BusinessList({
           connectionState === "connected" && confirmDisconnectBusinessId === business.id;
 
         return (
-          <li key={business.id} className="rounded-panel border-border-subtle bg-surface border overflow-hidden shadow-sm shadow-surface-muted/40">
+          <li key={business.id} className="overflow-hidden rounded-3xl border border-border-subtle bg-surface shadow-sm shadow-black/10">
             {business.imageUrl && (
               <img
                 src={business.imageUrl}
                 alt={business.name}
-                className="h-40 w-full object-cover"
+                className="h-52 w-full object-cover"
               />
             )}
-            <div className="p-4 sm:p-5">
+            <div className="p-5 sm:p-6">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <p className="text-lg font-semibold text-foreground">{business.name}</p>
@@ -81,20 +81,20 @@ export function BusinessList({
 
               <p className="mt-4 text-sm leading-6 text-text-muted">{business.shortDescription}</p>
 
-              <div className="mt-4 flex flex-wrap gap-3">
-                <Link href={`/business/${business.id}`} className="rounded-full border border-brand bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-700" type="button">
+              <div className="mt-5 flex flex-wrap gap-3">
+                <Link href={`/business/${business.id}`} className="rounded-2xl bg-brand px-5 py-3 text-sm font-semibold text-white transition hover:bg-brand/90">
                   View profile
                 </Link>
                 {connectionStates?.[business.id] === "pending-incoming" ? (
                   <Link
                     href="/inbox"
-                    className="rounded-full border border-border-subtle bg-surface-muted px-4 py-2 text-sm font-medium text-foreground transition hover:bg-surface"
+                    className="rounded-2xl border border-border-subtle bg-surface-muted px-5 py-3 text-sm font-medium text-foreground transition hover:bg-surface"
                   >
                     Respond in inbox
                   </Link>
                 ) : (
                   <button
-                    className="rounded-full border border-border-subtle bg-surface-muted px-4 py-2 text-sm font-medium text-foreground transition hover:bg-surface disabled:cursor-not-allowed disabled:opacity-70"
+                    className="rounded-2xl border border-border-subtle bg-surface-muted px-5 py-3 text-sm font-medium text-foreground transition hover:bg-surface disabled:cursor-not-allowed disabled:opacity-70"
                     type="button"
                     disabled={
                       !business.ownerId
