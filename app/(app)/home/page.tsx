@@ -24,6 +24,7 @@ type BusinessRow = {
   is_barter_friendly: boolean;
   has_urgent_need: boolean;
   short_description: string;
+  image_url: string | null;
 };
 
 type ConnectionRequestRow = {
@@ -134,7 +135,7 @@ export default function HomePage() {
       let query = supabase
         .from("businesses")
         .select(
-          "id, owner_id, name, location, category, is_dti_registered, is_barter_friendly, has_urgent_need, short_description"
+          "id, owner_id, name, location, category, is_dti_registered, is_barter_friendly, has_urgent_need, short_description, image_url"
         )
         .order("created_at", { ascending: false });
 
@@ -173,6 +174,7 @@ export default function HomePage() {
         isBarterFriendly: row.is_barter_friendly,
         hasUrgentNeed: row.has_urgent_need,
         shortDescription: row.short_description,
+        imageUrl: row.image_url,
       }));
 
       setBusinesses(formattedBusinesses);

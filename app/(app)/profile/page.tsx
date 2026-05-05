@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { ProfileOverview } from "@/components/features/profile-overview";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { ConnectedBusiness, Profile } from "@/lib/types/profile";
@@ -12,6 +13,7 @@ type ProfileRow = {
   location: string;
   trust_score: number;
   connections: number;
+  profile_image_url?: string | null;
 };
 
 type ConnectionRequestRow = {
@@ -46,7 +48,9 @@ export default function ProfilePage() {
     const currentUserId = userData.user.id;
     const { data: profileRowData } = await supabase
       .from("profiles")
-      .select("id, owner_name, business_name, location, trust_score, connections")
+      .select(
+        "id, owner_name, business_name, location, trust_score, connections, profile_image_url"
+      )
       .eq("id", currentUserId)
       .maybeSingle();
 
@@ -124,6 +128,7 @@ export default function ProfilePage() {
       connections: connectionRows.length,
       inventory: [],
       connectedBusinesses,
+      profileImageUrl: profileRow?.profile_image_url ?? null,
     });
   };
 
@@ -171,8 +176,18 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      <h1 className="text-2xl font-semibold leading-tight sm:text-3xl">Profile</h1>
-      <p className="text-text-muted text-sm">Business identity, trust indicators, and inventory placeholders.</p>
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold leading-tight sm:text-3xl">Profile</h1>
+          <p className="mt-1 text-text-muted text-sm">Business identity, trust indicators, and inventory placeholders.</p>
+        </div>
+        <Link
+          href="/profile/edit"
+          className="rounded-chip bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-700"
+        >
+          Edit Profile
+        </Link>
+      </div>
       {error ? (
         <div className="rounded-panel border-border-subtle bg-status-error-bg border border-status-error-fg p-4 text-sm text-status-error-fg">
           {error}

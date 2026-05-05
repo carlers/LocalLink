@@ -15,6 +15,7 @@ type BusinessRow = {
   short_description: string;
   owner_id: string | null;
   created_at: string;
+  image_url: string | null;
 };
 
 type PageProps = {
@@ -31,7 +32,7 @@ export default async function BusinessProfilePage({ params }: PageProps) {
     if (supabase) {
       const { data, error } = await supabase
         .from("businesses")
-        .select("id, name, location, category, is_dti_registered, is_barter_friendly, has_urgent_need, short_description, owner_id, created_at")
+        .select("id, name, location, category, is_dti_registered, is_barter_friendly, has_urgent_need, short_description, owner_id, created_at, image_url")
         .eq("id", id)
         .maybeSingle();
 
@@ -51,6 +52,7 @@ export default async function BusinessProfilePage({ params }: PageProps) {
           isBarterFriendly: row.is_barter_friendly,
           hasUrgentNeed: row.has_urgent_need,
           shortDescription: row.short_description,
+          imageUrl: row.image_url,
         };
 
         if (row.owner_id) {

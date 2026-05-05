@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { BusinessList } from "@/components/features/business-list";
+import { BusinessMap } from "@/components/features/business-map";
 import { DiscoverSearch } from "@/components/features/discover-search";
 import { SectionCard } from "@/components/ui/section-card";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -23,6 +24,8 @@ export default function DiscoverPage() {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [connectionStates, setConnectionStates] = useState<Record<string, BusinessConnectionState>>({});
   const [connectLoadingBusinessId, setConnectLoadingBusinessId] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"list" | "map">("map");
+  const [userLocation, setUserLocation] = useState<string>("manila");
 
   const hydrateConnectionStates = async (
     userId: string,
@@ -103,13 +106,17 @@ export default function DiscoverPage() {
     setError(null);
     setResultSummary("Searching businesses...");
 
+    if (location) {
+      setUserLocation(location);
+    }
+
     try {
       const supabase = createSupabaseBrowserClient();
 
       let query = supabase
         .from("businesses")
         .select(
-          "id, owner_id, name, location, category, is_dti_registered, is_barter_friendly, has_urgent_need, short_description",
+          "id, owner_id, name, location, category, is_dti_registered, is_barter_friendly, has_urgent_need, short_description, image_url",
         )
         .order("created_at", { ascending: false });
 
@@ -155,6 +162,7 @@ export default function DiscoverPage() {
         isBarterFriendly: row.is_barter_friendly,
         hasUrgentNeed: row.has_urgent_need,
         shortDescription: row.short_description,
+        imageUrl: row.image_url,
       }));
 
       setBusinesses(formattedBusinesses);
@@ -275,32 +283,69 @@ export default function DiscoverPage() {
       </SectionCard>
 
       <SectionCard title="Business Matches" description="Matched business profiles from your search criteria.">
-        {error && (
-          <div className="rounded-panel border-border-subtle bg-status-error-bg border border-status-error-fg p-4 text-sm text-status-error-fg">
-            {error}
-          </div>
-        )}
+        <div className="space-y-4">
+          {!isLoading && businesses.length > 0 && (
+            <div className="flex gap-2 border-border-subtle border-b pb-4">
+              <button
+                type="button"
+                onClick={() => setViewMode("list")}
+                className={`rounded-chip px-4 py-2 text-sm font-medium transition ${viewMode === "list"
+                  ? "bg-brand text-white"
+                  : "border-border-subtle border bg-surface text-foreground hover:bg-surface-muted"
+                  }`}
+              >
+                List view
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("map")}
+                className={`rounded-chip px-4 py-2 text-sm font-medium transition ${viewMode === "map"
+                  ? "bg-brand text-white"
+                  : "border-border-subtle border bg-surface text-foreground hover:bg-surface-muted"
+                  }`}
+              >
+                Map view
+              </button>
+            </div>
+          )}
 
-        {isLoading && (
-          <div className="rounded-panel border-border-subtle bg-surface-muted border p-4 text-sm text-text-muted">
-            Loading businesses...
-          </div>
-        )}
+          {error && (
+            <div className="rounded-panel border-border-subtle bg-status-error-bg border border-status-error-fg p-4 text-sm text-status-error-fg">
+              {error}
+            </div>
+          )}
 
-        {!isLoading && businesses.length === 0 && !error && (
-          <div className="rounded-panel border-border-subtle bg-surface-muted border p-4 text-sm text-text-muted">
-            No businesses are available right now. Try broadening your search or check back later.
-          </div>
-        )}
+          {isLoading && (
+            <div className="rounded-panel border-border-subtle bg-surface-muted border p-4 text-sm text-text-muted">
+              Loading businesses...
+            </div>
+          )}
 
-        {!isLoading && businesses.length > 0 && (
-          <BusinessList
-            businesses={businesses}
-            connectionStates={connectionStates}
-            connectLoadingBusinessId={connectLoadingBusinessId}
-            onConnect={handleConnect}
-          />
-        )}
+          {!isLoading && businesses.length === 0 && !error && (
+            <div className="rounded-panel border-border-subtle bg-surface-muted border p-4 text-sm text-text-muted">
+              No businesses are available right now. Try broadening your search or check back later.
+            </div>
+          )}
+
+          {!isLoading && businesses.length > 0 && viewMode === "map" && (
+            <BusinessMap
+              businesses={businesses}
+              centerLocation={userLocation}
+              onBusinessSelect={(business) => {
+                console.log("Selected business:", business);
+              }}
+            />
+          )}
+
+          {!isLoading && businesses.length > 0 && viewMode === "list" && (
+            <BusinessList
+              businesses={businesses}
+              connectionStates={connectionStates}
+              connectLoadingBusinessId={connectLoadingBusinessId}
+              onConnect={handleConnect}
+            />
+          )}
+        </div>
       </SectionCard>
     </div>
   );
