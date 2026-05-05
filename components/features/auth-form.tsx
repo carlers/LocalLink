@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { routes } from "@/lib/constants/routes";
+import type { BusinessCategory } from "@/lib/types/business";
 
 type AuthMode = "login" | "signup";
 
@@ -16,6 +17,11 @@ export function AuthForm({ mode }: AuthFormProps) {
   const [fullName, setFullName] = useState("");
   const [businessName, setBusinessName] = useState("");
   const [location, setLocation] = useState("");
+  const [category, setCategory] = useState<BusinessCategory>("Retail");
+  const [shortDescription, setShortDescription] = useState("");
+  const [isDtiRegistered, setIsDtiRegistered] = useState(false);
+  const [isBarterFriendly, setIsBarterFriendly] = useState(false);
+  const [hasUrgentNeed, setHasUrgentNeed] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
@@ -42,6 +48,11 @@ export function AuthForm({ mode }: AuthFormProps) {
               full_name: fullName,
               business_name: businessName,
               location,
+              business_category: category,
+              short_description: shortDescription,
+              business_is_dti_registered: String(isDtiRegistered),
+              business_is_barter_friendly: String(isBarterFriendly),
+              business_has_urgent_need: String(hasUrgentNeed),
             },
           },
         });
@@ -80,7 +91,7 @@ export function AuthForm({ mode }: AuthFormProps) {
   }
 
   return (
-    <form className="rounded-panel border-border-subtle bg-surface border p-4" onSubmit={handleSubmit}>
+    <form className="rounded-panel border-border-subtle bg-surface border p-4 sm:p-6" onSubmit={handleSubmit}>
       {isSignup ? (
         <>
           <label className="text-sm font-medium" htmlFor="fullName">
@@ -90,7 +101,7 @@ export function AuthForm({ mode }: AuthFormProps) {
             id="fullName"
             name="fullName"
             type="text"
-            className="rounded-chip border-border-subtle mt-1 w-full border px-3 py-2"
+            className="rounded-chip border-border-subtle mt-1 w-full border px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
             placeholder="Juan Dela Cruz"
             value={fullName}
             onChange={(event) => setFullName(event.target.value)}
@@ -105,7 +116,7 @@ export function AuthForm({ mode }: AuthFormProps) {
             id="businessName"
             name="businessName"
             type="text"
-            className="rounded-chip border-border-subtle mt-1 w-full border px-3 py-2"
+            className="rounded-chip border-border-subtle mt-1 w-full border px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
             placeholder="Your business name"
             value={businessName}
             onChange={(event) => setBusinessName(event.target.value)}
@@ -120,13 +131,84 @@ export function AuthForm({ mode }: AuthFormProps) {
             id="location"
             name="location"
             type="text"
-            className="rounded-chip border-border-subtle mt-1 w-full border px-3 py-2"
+            className="rounded-chip border-border-subtle mt-1 w-full border px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
             placeholder="City or barangay"
             value={location}
             onChange={(event) => setLocation(event.target.value)}
             autoComplete="address-level2"
             required
           />
+
+          <label className="mt-3 block text-sm font-medium" htmlFor="category">
+            Business category
+          </label>
+          <select
+            id="category"
+            name="category"
+            className="rounded-chip border-border-subtle mt-1 w-full border px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+            value={category}
+            onChange={(event) => setCategory(event.target.value as BusinessCategory)}
+            required
+          >
+            <option value="Retail">Retail</option>
+            <option value="Food">Food</option>
+            <option value="Services">Services</option>
+            <option value="Manufacturing">Manufacturing</option>
+            <option value="Other">Other</option>
+          </select>
+
+          <label className="mt-3 block text-sm font-medium" htmlFor="shortDescription">
+            Short description
+          </label>
+          <textarea
+            id="shortDescription"
+            name="shortDescription"
+            className="rounded-chip border-border-subtle mt-1 min-h-24 w-full border px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+            placeholder="Tell others what your business offers or needs."
+            value={shortDescription}
+            onChange={(event) => setShortDescription(event.target.value)}
+            required
+          />
+
+          <div className="mt-4 space-y-3 rounded-panel border-border-subtle bg-surface-muted border p-4">
+            <p className="text-sm font-medium">Business details</p>
+
+            <label className="flex items-center gap-3 text-sm" htmlFor="isDtiRegistered">
+              <input
+                id="isDtiRegistered"
+                name="isDtiRegistered"
+                type="checkbox"
+                className="h-4 w-4 rounded border-border-subtle text-brand focus:ring-brand"
+                checked={isDtiRegistered}
+                onChange={(event) => setIsDtiRegistered(event.target.checked)}
+              />
+              DTI registered
+            </label>
+
+            <label className="flex items-center gap-3 text-sm" htmlFor="isBarterFriendly">
+              <input
+                id="isBarterFriendly"
+                name="isBarterFriendly"
+                type="checkbox"
+                className="h-4 w-4 rounded border-border-subtle text-brand focus:ring-brand"
+                checked={isBarterFriendly}
+                onChange={(event) => setIsBarterFriendly(event.target.checked)}
+              />
+              Open to barter or trade
+            </label>
+
+            <label className="flex items-center gap-3 text-sm" htmlFor="hasUrgentNeed">
+              <input
+                id="hasUrgentNeed"
+                name="hasUrgentNeed"
+                type="checkbox"
+                className="h-4 w-4 rounded border-border-subtle text-brand focus:ring-brand"
+                checked={hasUrgentNeed}
+                onChange={(event) => setHasUrgentNeed(event.target.checked)}
+              />
+              Has an urgent need right now
+            </label>
+          </div>
         </>
       ) : null}
 
@@ -137,7 +219,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         id="email"
         name="email"
         type="email"
-        className="rounded-chip border-border-subtle mt-1 w-full border px-3 py-2"
+        className="rounded-chip border-border-subtle mt-1 w-full border px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
         placeholder="you@business.com"
         value={email}
         onChange={(event) => setEmail(event.target.value)}
@@ -152,7 +234,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         id="password"
         name="password"
         type="password"
-        className="rounded-chip border-border-subtle mt-1 w-full border px-3 py-2"
+        className="rounded-chip border-border-subtle mt-1 w-full border px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
         placeholder={isSignup ? "Create password" : "Enter password"}
         value={password}
         onChange={(event) => setPassword(event.target.value)}
@@ -165,7 +247,7 @@ export function AuthForm({ mode }: AuthFormProps) {
 
       <button
         type="submit"
-        className="rounded-chip bg-brand mt-4 w-full px-3 py-2 text-sm font-semibold text-white disabled:opacity-60"
+        className="rounded-chip bg-brand mt-4 w-full px-3 py-3 text-sm font-semibold text-white disabled:opacity-60 sm:py-2.5"
         disabled={isSubmitting}
       >
         {isSubmitting ? "Please wait..." : isSignup ? "Sign Up" : "Log In"}
