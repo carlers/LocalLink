@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { routes } from "@/lib/constants/routes";
+import type { BusinessCategory } from "@/lib/types/business";
 
 type AuthMode = "login" | "signup";
 
@@ -16,6 +17,11 @@ export function AuthForm({ mode }: AuthFormProps) {
   const [fullName, setFullName] = useState("");
   const [businessName, setBusinessName] = useState("");
   const [location, setLocation] = useState("");
+  const [category, setCategory] = useState<BusinessCategory>("Retail");
+  const [shortDescription, setShortDescription] = useState("");
+  const [isDtiRegistered, setIsDtiRegistered] = useState(false);
+  const [isBarterFriendly, setIsBarterFriendly] = useState(false);
+  const [hasUrgentNeed, setHasUrgentNeed] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
@@ -42,6 +48,11 @@ export function AuthForm({ mode }: AuthFormProps) {
               full_name: fullName,
               business_name: businessName,
               location,
+              business_category: category,
+              short_description: shortDescription,
+              business_is_dti_registered: String(isDtiRegistered),
+              business_is_barter_friendly: String(isBarterFriendly),
+              business_has_urgent_need: String(hasUrgentNeed),
             },
           },
         });
@@ -127,6 +138,77 @@ export function AuthForm({ mode }: AuthFormProps) {
             autoComplete="address-level2"
             required
           />
+
+          <label className="mt-3 block text-sm font-medium" htmlFor="category">
+            Business category
+          </label>
+          <select
+            id="category"
+            name="category"
+            className="rounded-chip border-border-subtle mt-1 w-full border px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+            value={category}
+            onChange={(event) => setCategory(event.target.value as BusinessCategory)}
+            required
+          >
+            <option value="Retail">Retail</option>
+            <option value="Food">Food</option>
+            <option value="Services">Services</option>
+            <option value="Manufacturing">Manufacturing</option>
+            <option value="Other">Other</option>
+          </select>
+
+          <label className="mt-3 block text-sm font-medium" htmlFor="shortDescription">
+            Short description
+          </label>
+          <textarea
+            id="shortDescription"
+            name="shortDescription"
+            className="rounded-chip border-border-subtle mt-1 min-h-24 w-full border px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+            placeholder="Tell others what your business offers or needs."
+            value={shortDescription}
+            onChange={(event) => setShortDescription(event.target.value)}
+            required
+          />
+
+          <div className="mt-4 space-y-3 rounded-panel border-border-subtle bg-surface-muted border p-4">
+            <p className="text-sm font-medium">Business details</p>
+
+            <label className="flex items-center gap-3 text-sm" htmlFor="isDtiRegistered">
+              <input
+                id="isDtiRegistered"
+                name="isDtiRegistered"
+                type="checkbox"
+                className="h-4 w-4 rounded border-border-subtle text-brand focus:ring-brand"
+                checked={isDtiRegistered}
+                onChange={(event) => setIsDtiRegistered(event.target.checked)}
+              />
+              DTI registered
+            </label>
+
+            <label className="flex items-center gap-3 text-sm" htmlFor="isBarterFriendly">
+              <input
+                id="isBarterFriendly"
+                name="isBarterFriendly"
+                type="checkbox"
+                className="h-4 w-4 rounded border-border-subtle text-brand focus:ring-brand"
+                checked={isBarterFriendly}
+                onChange={(event) => setIsBarterFriendly(event.target.checked)}
+              />
+              Open to barter or trade
+            </label>
+
+            <label className="flex items-center gap-3 text-sm" htmlFor="hasUrgentNeed">
+              <input
+                id="hasUrgentNeed"
+                name="hasUrgentNeed"
+                type="checkbox"
+                className="h-4 w-4 rounded border-border-subtle text-brand focus:ring-brand"
+                checked={hasUrgentNeed}
+                onChange={(event) => setHasUrgentNeed(event.target.checked)}
+              />
+              Has an urgent need right now
+            </label>
+          </div>
         </>
       ) : null}
 

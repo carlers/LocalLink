@@ -7,6 +7,7 @@ export type BusinessCategory =
 
 export type Business = {
   id: string;
+  ownerId?: string | null;
   name: string;
   location: string;
   category: BusinessCategory;

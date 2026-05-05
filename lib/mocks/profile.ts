@@ -7,6 +7,15 @@ export const mockProfile: Profile = {
   location: "Quezon City",
   trustScore: 89,
   connections: 14,
+  connectedBusinesses: [
+    {
+      id: "profile-2",
+      ownerId: "profile-2",
+      ownerName: "Jose Reyes",
+      businessName: "Reyes Grocery",
+      location: "Makati",
+    },
+  ],
   inventory: [
     {
       id: "inv-1",

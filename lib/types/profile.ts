@@ -5,6 +5,14 @@ export type InventoryItem = {
   kind: "available" | "needed";
 };
 
+export type ConnectedBusiness = {
+  id: string;
+  ownerId: string;
+  ownerName: string;
+  businessName: string;
+  location: string;
+};
+
 export type Profile = {
   id: string;
   ownerName: string;
@@ -13,4 +21,5 @@ export type Profile = {
   trustScore: number;
   connections: number;
   inventory: InventoryItem[];
+  connectedBusinesses: ConnectedBusiness[];
 };
