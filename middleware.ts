@@ -59,3 +59,5 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: ["/home/:path*", "/discover/:path*", "/inbox/:path*", "/profile/:path*", "/login", "/signup"],
 };
+
+console.log("URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);

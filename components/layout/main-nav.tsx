@@ -47,15 +47,15 @@ export function MainNav() {
   }
 
   return (
-    <header className="border-border-subtle bg-surface/95 border-b backdrop-blur">
-      <nav className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
-        <Link href={routes.home} className="text-foreground inline-flex items-center gap-2 text-lg font-semibold">
+    <header className="bg-[#487b7a] border-b border-[#487b7a]/15 shadow-sm shadow-black/20">
+      <nav className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
+        <Link href={routes.home} className="inline-flex items-center gap-3 text-xl font-bold text-white tracking-tight">
           <Image
-            src="/favicon_io/favicon-32x32.png"
+            src="/favicon_io/android-chrome-192x192.png"
             alt="LocalLink"
-            width={28}
-            height={28}
-            className="h-7 w-7 shrink-0"
+            width={44}
+            height={44}
+            className="h-11 w-11 shrink-0"
             priority
           />
           <span>LocalLink</span>
@@ -67,7 +67,7 @@ export function MainNav() {
               <li key={item.href}>
                 <Link
                   href={item.href}
-                  className="text-text-muted hover:bg-surface-muted hover:text-foreground rounded-chip px-3 py-2 text-sm font-medium"
+                  className="text-white/80 hover:text-white rounded-full px-4 py-2 text-sm font-medium transition duration-150"
                 >
                   <span className="inline-flex items-center gap-2">
                     <span>{item.label}</span>
@@ -88,7 +88,7 @@ export function MainNav() {
                 aria-label="Account menu"
                 aria-expanded={accountOpen}
                 onClick={() => setAccountOpen((s) => !s)}
-                className="rounded-full bg-surface-muted p-2"
+                className="rounded-full bg-surface-muted p-2 text-white transition hover:bg-surface"
               >
                 <svg className="h-5 w-5 text-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                   <path strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-3.31 0-6 2.69-6 6h12c0-3.31-2.69-6-6-6z" />
@@ -96,10 +96,10 @@ export function MainNav() {
               </button>
 
               {accountOpen && (
-                <div className="absolute right-0 mt-2 w-40 rounded-panel border-border-subtle bg-surface border p-2 shadow-lg">
+                <div className="absolute right-0 mt-2 w-44 rounded-2xl border border-border-subtle bg-surface border p-2 shadow-lg shadow-black/20">
                   <Link
                     href={routes.profile}
-                    className="block px-3 py-2 text-sm text-text-muted hover:bg-surface-muted rounded"
+                    className="block px-3 py-2 text-sm text-white/80 hover:text-white hover:bg-surface-muted rounded transition"
                     onClick={() => setAccountOpen(false)}
                   >
                     Profile
@@ -122,7 +122,7 @@ export function MainNav() {
           aria-expanded={mobileOpen}
           aria-controls="mobile-menu"
           onClick={() => setMobileOpen((s) => !s)}
-          className="rounded-chip border-border-subtle bg-surface-muted inline-flex items-center justify-center border p-2 md:hidden"
+          className="rounded-full border border-white/15 bg-surface-muted inline-flex items-center justify-center p-2 text-white transition hover:bg-surface md:hidden"
         >
           <svg className="h-5 w-5 text-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <path strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
@@ -131,14 +131,14 @@ export function MainNav() {
       </nav>
 
       {mobileOpen ? (
-        <div id="mobile-menu" className="border-border-subtle border-t px-4 py-3 sm:px-6 md:hidden">
+        <div id="mobile-menu" className="border-border-subtle border-t bg-surface px-4 py-4 sm:px-6 md:hidden">
           <ul className="space-y-2">
             {mainNavItems.map((item) => (
               <li key={item.href}>
                 <Link
                   href={item.href}
                   onClick={() => setMobileOpen(false)}
-                  className="text-text-muted hover:bg-surface-muted hover:text-foreground block rounded-chip px-3 py-3 text-sm font-medium"
+                  className="text-white/80 hover:text-white block rounded-2xl bg-surface-muted/80 px-3 py-3 text-sm font-medium transition"
                 >
                   <span className="flex items-center justify-between gap-3">
                     <span>{item.label}</span>
@@ -158,7 +158,7 @@ export function MainNav() {
               <Link
                 href={routes.profile}
                 onClick={() => setMobileOpen(false)}
-                className="text-text-muted hover:bg-surface-muted hover:text-foreground block rounded-chip px-3 py-3 text-sm font-medium"
+                className="text-white/80 hover:text-white block rounded-2xl bg-surface-muted/80 px-3 py-3 text-sm font-medium transition"
               >
                 Profile
               </Link>
@@ -167,7 +167,7 @@ export function MainNav() {
                   setMobileOpen(false);
                   await handleLogout();
                 }}
-                className="text-text-muted hover:bg-surface-muted hover:text-foreground block w-full rounded-chip px-3 py-3 text-left text-sm font-medium"
+                className="text-white/80 hover:text-white block w-full rounded-2xl bg-surface-muted/80 px-3 py-3 text-left text-sm font-medium transition"
               >
                 Log out
               </button>
