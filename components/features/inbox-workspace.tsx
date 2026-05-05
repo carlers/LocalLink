@@ -507,6 +507,7 @@ export function InboxWorkspace({ initialConversationId = null }: InboxWorkspaceP
         notificationActionLoadingId={notificationActionLoadingId}
         selectedConversationId={selectedConversationId}
         onSelectConversation={setSelectedConversationId}
+        onBackToInbox={() => setSelectedConversationId(null)}
       />
     </div>
   );

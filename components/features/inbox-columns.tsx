@@ -23,6 +23,7 @@ type InboxColumnsProps = {
   notificationActionLoadingId?: string | null;
   selectedConversationId?: string | null;
   onSelectConversation?: (conversationId: string) => void;
+  onBackToInbox?: () => void;
 };
 
 export function InboxColumns({
@@ -37,11 +38,13 @@ export function InboxColumns({
   notificationActionLoadingId,
   selectedConversationId = null,
   onSelectConversation,
+  onBackToInbox,
 }: InboxColumnsProps) {
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden">
-      <div className="grid gap-3 xl:grid-cols-2">
-        <section className="rounded-panel border-border-subtle bg-surface border p-3.5">
+    <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden sm:gap-3 lg:gap-4">
+      {/* Top band: requests and notifications - more compact on mobile */}
+      <div className="grid gap-2 sm:gap-3 lg:grid-cols-2">
+        <section className="rounded-panel border-border-subtle bg-surface border p-2.5 sm:p-3 lg:p-3.5">
           <h2 className="text-foreground text-base font-semibold">Connection Requests</h2>
           {connectionRequests.length === 0 ? (
             <p className="text-text-muted mt-2 text-sm">No pending connection requests.</p>
@@ -96,7 +99,7 @@ export function InboxColumns({
           )}
         </section>
 
-        <section className="rounded-panel border-border-subtle bg-surface border p-3.5">
+        <section className="rounded-panel border-border-subtle bg-surface border p-2.5 sm:p-3 lg:p-3.5">
           <h2 className="text-foreground text-base font-semibold">Notifications</h2>
           {notifications.length === 0 ? (
             <p className="text-text-muted mt-2 text-sm">No notifications yet.</p>
@@ -152,9 +155,31 @@ export function InboxColumns({
         </section>
       </div>
 
-      <section className="rounded-panel border-border-subtle bg-surface flex min-h-0 flex-1 flex-col border p-4">
-        <div className="flex min-h-0 flex-1 flex-col gap-4 xl:grid xl:grid-cols-[320px_minmax(0,1fr)]">
-          <div className="rounded-panel border-border-subtle bg-surface-muted flex min-h-0 flex-1 flex-col border p-4">
+      <section className="rounded-panel border-border-subtle bg-surface flex min-h-0 flex-1 flex-col border p-2.5 sm:p-3 lg:p-4">
+        {/* On mobile: show list OR chat depending on selection. On desktop: show both */}
+        {selectedConversationId ? (
+          // Selected: show chat full-width on mobile, right side on desktop
+          <div className="flex min-h-0 flex-1 flex-col gap-4 xl:grid xl:grid-cols-[320px_minmax(0,1fr)]">
+            {/* Desktop only: show list on the left */}
+            <div className="hidden rounded-panel border-border-subtle bg-surface-muted flex-col border p-3 sm:p-3.5 xl:flex xl:p-4 min-h-0 flex-1">
+              <h2 className="text-foreground text-lg font-semibold">Conversations</h2>
+              <div className="mt-3 min-h-0 flex-1 overflow-y-auto pr-1">
+                <ConversationList
+                  conversations={conversations}
+                  selectedConversationId={selectedConversationId}
+                  onSelectConversation={onSelectConversation}
+                />
+              </div>
+            </div>
+
+            {/* Chat pane: takes full width on mobile, right side on desktop */}
+            <div className="min-h-0 flex-1 overflow-hidden">
+              <ConversationPane conversationId={selectedConversationId} compact onBackToInbox={onBackToInbox} />
+            </div>
+          </div>
+        ) : (
+          // Not selected: show list full-width
+          <div className="rounded-panel border-border-subtle bg-surface-muted flex min-h-0 flex-1 flex-col border p-3 sm:p-3.5 lg:p-4">
             <h2 className="text-foreground text-lg font-semibold">Conversations</h2>
             <div className="mt-3 min-h-0 flex-1 overflow-y-auto pr-1">
               <ConversationList
@@ -164,11 +189,7 @@ export function InboxColumns({
               />
             </div>
           </div>
-
-          <div className="min-h-0 flex-1 overflow-hidden">
-            <ConversationPane conversationId={selectedConversationId} compact />
-          </div>
-        </div>
+        )}
       </section>
     </div>
   );

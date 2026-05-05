@@ -275,7 +275,7 @@ export function ConversationPane({ conversationId, compact = false, onBackToInbo
   }
 
   return (
-    <section className="rounded-panel border-border-subtle bg-surface flex h-full min-h-0 flex-col overflow-hidden border p-4 sm:p-5">
+    <section className="rounded-panel border-border-subtle bg-surface flex h-full min-h-0 flex-col overflow-hidden border p-2.5 sm:p-3 lg:p-4 xl:p-5">
       <div className="flex items-start justify-between gap-3 border-b border-border-subtle pb-3">
         <div className="min-w-0">
           <p className="text-text-muted text-sm">

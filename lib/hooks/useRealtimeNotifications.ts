@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import type { Notification } from '@/lib/types/message';
 
@@ -13,7 +13,11 @@ export function useRealtimeNotifications(
   onNewNotification: (notification: Notification) => void,
   onNotificationUpdated: (notification: Notification) => void
 ): void {
+  const isMountedRef = useRef(true);
+
   useEffect(() => {
+    isMountedRef.current = true;
+
     if (!profileId) return;
 
     const supabase = createSupabaseBrowserClient();
@@ -30,6 +34,7 @@ export function useRealtimeNotifications(
           filter: `profile_id=eq.${profileId}`,
         },
         (payload) => {
+          if (!isMountedRef.current) return;
           const newNotification: Notification = {
             id: payload.new.id,
             title: payload.new.title,
@@ -54,6 +59,7 @@ export function useRealtimeNotifications(
           filter: `profile_id=eq.${profileId}`,
         },
         (payload) => {
+          if (!isMountedRef.current) return;
           const updatedNotification: Notification = {
             id: payload.new.id,
             title: payload.new.title,
@@ -67,8 +73,15 @@ export function useRealtimeNotifications(
       .subscribe();
 
     return () => {
+      isMountedRef.current = false;
       supabase.removeChannel(insertSubscription);
       supabase.removeChannel(updateSubscription);
     };
   }, [profileId, onNewNotification, onNotificationUpdated]);
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 }
