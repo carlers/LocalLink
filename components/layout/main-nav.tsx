@@ -13,9 +13,12 @@ export function MainNav() {
   const [accountOpen, setAccountOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
   const inboxBadgeCount = useInboxBadgeCount(userId);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
+
+  const ownerInitials = profileImageUrl ? "" : "";
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
@@ -23,8 +26,28 @@ export function MainNav() {
     let mounted = true;
     supabase.auth.getUser().then(({ data }) => {
       if (!mounted) return;
+      const nextUserId = data.user?.id ?? null;
       setUserPresent(Boolean(data.user));
-      setUserId(data.user?.id ?? null);
+      setUserId(nextUserId);
+
+      if (!nextUserId) {
+        setProfileImageUrl(null);
+        return;
+      }
+
+      supabase
+        .from("profiles")
+        .select("profile_image_url")
+        .eq("id", nextUserId)
+        .maybeSingle()
+        .then(({ data: profileData }) => {
+          if (!mounted) return;
+          setProfileImageUrl(profileData?.profile_image_url ?? null);
+        })
+        .catch(() => {
+          if (!mounted) return;
+          setProfileImageUrl(null);
+        });
     });
 
     function onDoc(e: MouseEvent) {
@@ -88,15 +111,26 @@ export function MainNav() {
                 aria-label="Account menu"
                 aria-expanded={accountOpen}
                 onClick={() => setAccountOpen((s) => !s)}
-                className="rounded-full bg-surface-muted p-2 text-white transition hover:bg-surface"
+                className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-white/15 bg-surface-muted text-white transition hover:bg-surface"
               >
-                <svg className="h-5 w-5 text-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-3.31 0-6 2.69-6 6h12c0-3.31-2.69-6-6-6z" />
-                </svg>
+                {profileImageUrl ? (
+                  <Image
+                    src={profileImageUrl}
+                    alt="Profile avatar"
+                    width={40}
+                    height={40}
+                    className="h-full w-full object-cover"
+                    unoptimized
+                  />
+                ) : (
+                  <svg className="h-5 w-5 text-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-3.31 0-6 2.69-6 6h12c0-3.31-2.69-6-6-6z" />
+                  </svg>
+                )}
               </button>
 
               {accountOpen && (
-                <div className="absolute right-0 mt-2 w-44 rounded-2xl border border-border-subtle bg-surface border p-2 shadow-lg shadow-black/20">
+                <div className="absolute right-0 mt-2 w-44 rounded-2xl border border-border-subtle bg-surface p-2 shadow-lg shadow-black/20">
                   <Link
                     href={routes.profile}
                     className="block px-3 py-2 text-sm text-white/80 hover:text-white hover:bg-surface-muted rounded transition"

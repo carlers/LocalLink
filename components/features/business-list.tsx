@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import Link from "next/link";
 import type { Business } from "@/lib/types/business";
@@ -37,99 +38,105 @@ export function BusinessList({
   const [confirmDisconnectBusinessId, setConfirmDisconnectBusinessId] = useState<string | null>(null);
 
   return (
-    <ul className="grid gap-4">
-      {businesses.map((business) => {
-        const connectionState = connectionStates?.[business.id] ?? "none";
-        const isConfirmingDisconnect =
-          connectionState === "connected" && confirmDisconnectBusinessId === business.id;
+  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    {businesses.map((business) => {
+      const connectionState = connectionStates?.[business.id] ?? "none";
+      const isConfirmingDisconnect =
+        connectionState === "connected" && confirmDisconnectBusinessId === business.id;
 
-        return (
-          <li key={business.id} className="overflow-hidden rounded-3xl border border-border-subtle bg-surface shadow-sm shadow-black/10">
-            {business.imageUrl && (
-              <img
+      return (
+        <li key={business.id} className="overflow-hidden rounded-2xl border border-border-subtle bg-surface shadow-sm shadow-black/10">
+          <div className="relative aspect-[7/4] w-full overflow-hidden bg-surface-muted">
+            {business.imageUrl ? (
+              <Image
                 src={business.imageUrl}
                 alt={business.name}
-                className="h-52 w-full object-cover"
+                fill
+                className="object-cover"
+                unoptimized
               />
-            )}
-            <div className="p-5 sm:p-6">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <p className="text-lg font-semibold text-foreground">{business.name}</p>
-                  <p className="mt-1 text-sm text-text-muted">
-                    {business.location} • {business.category}
-                  </p>
-                </div>
-                <div className="flex flex-wrap items-center gap-2 text-xs font-medium uppercase tracking-[0.16em] text-text-muted">
-                  {business.isDtiRegistered ? (
-                    <span className="rounded-full border border-brand/20 bg-brand/10 px-2 py-1 text-brand">
-                      DTI Registered
-                    </span>
-                  ) : null}
-                  {business.isBarterFriendly ? (
-                    <span className="rounded-full border border-foreground/10 bg-surface-muted px-2 py-1">
-                      Barter Friendly
-                    </span>
-                  ) : null}
-                  {business.hasUrgentNeed ? (
-                    <span className="rounded-full border border-accent-urgent/20 bg-accent-urgent/10 px-2 py-1 text-accent-urgent">
-                      Urgent Need
-                    </span>
-                  ) : null}
-                </div>
+            ) : (
+              <div className="flex h-full w-full items-end bg-gradient-to-br from-brand/20 via-surface-muted to-surface-muted p-3">
+                <span className="text-xs font-semibold uppercase tracking-[0.24em] text-text-muted">
+                  No business photo yet
+                </span>
               </div>
-
-              <p className="mt-4 text-sm leading-6 text-text-muted">{business.shortDescription}</p>
-
-              <div className="mt-5 flex flex-wrap gap-3">
-                <Link href={`/business/${business.id}`} className="rounded-2xl bg-brand px-5 py-3 text-sm font-semibold text-white transition hover:bg-brand/90">
-                  View profile
-                </Link>
-                {connectionStates?.[business.id] === "pending-incoming" ? (
-                  <Link
-                    href="/inbox"
-                    className="rounded-2xl border border-border-subtle bg-surface-muted px-5 py-3 text-sm font-medium text-foreground transition hover:bg-surface"
-                  >
-                    Respond in inbox
-                  </Link>
-                ) : (
-                  <button
-                    className="rounded-2xl border border-border-subtle bg-surface-muted px-5 py-3 text-sm font-medium text-foreground transition hover:bg-surface disabled:cursor-not-allowed disabled:opacity-70"
-                    type="button"
-                    disabled={
-                      !business.ownerId
-                      || connectLoadingBusinessId === business.id
-                    }
-                    onClick={() => {
-                      if (!onConnect) {
-                        return;
-                      }
-
-                      if (connectionState === "connected" && !isConfirmingDisconnect) {
-                        setConfirmDisconnectBusinessId(business.id);
-                        return;
-                      }
-
-                      setConfirmDisconnectBusinessId(null);
-                      void onConnect(business, connectionState);
-                    }}
-                  >
-                    {connectLoadingBusinessId === business.id
-                      ? connectionState === "pending-outgoing"
-                        ? "Cancelling..."
-                        : connectionState === "connected"
-                          ? "Disconnecting..."
-                          : "Sending..."
-                      : isConfirmingDisconnect
-                        ? "Confirm disconnect"
-                        : resolveConnectLabel(connectionState)}
-                  </button>
+            )}
+          </div>
+          <div className="p-4">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <p className="text-base font-semibold text-foreground">{business.name}</p>
+                <p className="mt-1 text-xs text-text-muted">
+                  {business.location} • {business.category}
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-1 text-xs font-medium uppercase tracking-[0.16em] text-text-muted">
+                {business.isDtiRegistered && (
+                  <span className="rounded-full border border-brand/20 bg-brand/10 px-2 py-0.5 text-brand">
+                    DTI Registered
+                  </span>
+                )}
+                {business.isBarterFriendly && (
+                  <span className="rounded-full border border-foreground/10 bg-surface-muted px-2 py-0.5">
+                    Barter Friendly
+                  </span>
+                )}
+                {business.hasUrgentNeed && (
+                  <span className="rounded-full border border-accent-urgent/20 bg-accent-urgent/10 px-2 py-0.5 text-accent-urgent">
+                    Urgent Need
+                  </span>
                 )}
               </div>
             </div>
-          </li>
-        );
-      })}
-    </ul>
-  );
+
+            <p className="mt-3 text-xs leading-5 text-text-muted">{business.shortDescription}</p>
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Link
+                href={`/business/${business.id}`}
+                className="rounded-xl bg-brand px-4 py-2 text-xs font-semibold text-white transition hover:bg-brand/90"
+              >
+                View profile
+              </Link>
+              {connectionStates?.[business.id] === "pending-incoming" ? (
+                <Link
+                  href="/inbox"
+                  className="rounded-xl border border-border-subtle bg-surface-muted px-4 py-2 text-xs font-medium text-foreground transition hover:bg-surface"
+                >
+                  Respond in inbox
+                </Link>
+              ) : (
+                <button
+                  className="rounded-xl border border-border-subtle bg-surface-muted px-4 py-2 text-xs font-medium text-foreground transition hover:bg-surface disabled:cursor-not-allowed disabled:opacity-70"
+                  type="button"
+                  disabled={!business.ownerId || connectLoadingBusinessId === business.id}
+                  onClick={() => {
+                    if (!onConnect) return;
+                    if (connectionState === "connected" && !isConfirmingDisconnect) {
+                      setConfirmDisconnectBusinessId(business.id);
+                      return;
+                    }
+                    setConfirmDisconnectBusinessId(null);
+                    void onConnect(business, connectionState);
+                  }}
+                >
+                  {connectLoadingBusinessId === business.id
+                    ? connectionState === "pending-outgoing"
+                      ? "Cancelling..."
+                      : connectionState === "connected"
+                        ? "Disconnecting..."
+                        : "Sending..."
+                    : isConfirmingDisconnect
+                      ? "Confirm disconnect"
+                      : resolveConnectLabel(connectionState)}
+                </button>
+              )}
+            </div>
+          </div>
+        </li>
+      );
+    })}
+  </ul>
+);
 }
