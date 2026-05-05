@@ -5,11 +5,14 @@ import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { mainNavItems, routes } from "@/lib/constants/routes";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { useInboxBadgeCount } from "@/lib/hooks/useInboxBadgeCount";
 
 export function MainNav() {
   const [userPresent, setUserPresent] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const inboxBadgeCount = useInboxBadgeCount(userId);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
 
@@ -20,6 +23,7 @@ export function MainNav() {
     supabase.auth.getUser().then(({ data }) => {
       if (!mounted) return;
       setUserPresent(Boolean(data.user));
+      setUserId(data.user?.id ?? null);
     });
 
     function onDoc(e: MouseEvent) {
@@ -56,7 +60,14 @@ export function MainNav() {
                   href={item.href}
                   className="text-text-muted hover:bg-surface-muted hover:text-foreground rounded-chip px-3 py-2 text-sm font-medium"
                 >
-                  {item.label}
+                  <span className="inline-flex items-center gap-2">
+                    <span>{item.label}</span>
+                    {item.href === routes.inbox && inboxBadgeCount > 0 ? (
+                      <span className="bg-brand text-white inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold leading-none">
+                        {inboxBadgeCount > 99 ? "99+" : inboxBadgeCount}
+                      </span>
+                    ) : null}
+                  </span>
                 </Link>
               </li>
             ))}
@@ -120,7 +131,14 @@ export function MainNav() {
                   onClick={() => setMobileOpen(false)}
                   className="text-text-muted hover:bg-surface-muted hover:text-foreground block rounded-chip px-3 py-3 text-sm font-medium"
                 >
-                  {item.label}
+                  <span className="flex items-center justify-between gap-3">
+                    <span>{item.label}</span>
+                    {item.href === routes.inbox && inboxBadgeCount > 0 ? (
+                      <span className="bg-brand text-white inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold leading-none">
+                        {inboxBadgeCount > 99 ? "99+" : inboxBadgeCount}
+                      </span>
+                    ) : null}
+                  </span>
                 </Link>
               </li>
             ))}

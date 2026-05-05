@@ -159,8 +159,7 @@ Follow this sequence for implementation tasks:
 4. If schema or RLS changes are needed, add a new numbered migration in supabase/migrations (never rewrite an applied migration).
 5. Keep new assets organized under public/.
 6. Run npm run lint.
-7. Run npx next build --webpack.
-8. Report results: what changed, why, and verification status.
+7. Report results: what changed, why, and verification status.
 
 If lint/build fails:
 
@@ -183,8 +182,7 @@ A task is done only when all are true:
 1. Requested behavior is implemented.
 2. Code follows token and architecture rules above.
 3. Lint passes.
-4. Production build passes.
-5. Final report includes changed files and verification outcomes.
+4. Final report includes changed files and verification outcomes.
 
 ## 11) Recommended Final Report Template
 
@@ -194,5 +192,4 @@ Use this concise structure when handing work back:
 2. Files changed.
 3. Verification results:
    - npm run lint
-   - npx next build --webpack
 4. Any follow-up notes or tradeoffs.

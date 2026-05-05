@@ -6,12 +6,14 @@ export const mockNotifications: Notification[] = [
     title: "New connection request",
     detail: "Bayanihan Bakers wants to connect with your business.",
     createdAt: "Today",
+    isRead: false,
   },
   {
     id: "notif-2",
     title: "Opportunity nearby",
     detail: "A store in Pasig posted an urgent need for rice sacks.",
     createdAt: "Yesterday",
+    isRead: true,
   },
 ];
 
