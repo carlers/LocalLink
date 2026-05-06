@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { useMemo } from "react";
 import type { Business } from "@/lib/types/business";
@@ -20,6 +21,8 @@ const MapContainerInner = dynamic(
         displayBusinesses: Business[];
         onBusinessSelect?: (business: Business) => void;
       }) {
+        const router = useRouter();
+
         return (
           <MapContainer
             center={[centerCoords.lat, centerCoords.lng]}
@@ -60,6 +63,7 @@ const MapContainerInner = dynamic(
                         type="button"
                         className="mt-2 w-full rounded-chip bg-brand px-3 py-1 text-xs font-semibold text-white transition hover:bg-teal-700"
                         onClick={() => {
+                          router.push(`/business/${business.id}`);
                           if (onBusinessSelect) {
                             onBusinessSelect(business);
                           }
