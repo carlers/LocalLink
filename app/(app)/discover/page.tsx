@@ -328,13 +328,15 @@ export default function DiscoverPage() {
           )}
 
           {!isLoading && businesses.length > 0 && viewMode === "map" && (
-            <BusinessMap
-              businesses={businesses}
-              centerLocation={userLocation}
-              onBusinessSelect={(business) => {
-                console.log("Selected business:", business);
-              }}
-            />
+            <div className="rounded-panel border-border-subtle border shadow-sm overflow-hidden">
+              <BusinessMap
+                businesses={businesses}
+                centerLocation={userLocation}
+                onBusinessSelect={(business) => {
+                  console.log("Selected business:", business);
+                }}
+              />
+            </div>
           )}
 
           {!isLoading && businesses.length > 0 && viewMode === "list" && (
