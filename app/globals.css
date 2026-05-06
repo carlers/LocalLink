@@ -1,5 +1,19 @@
 @import "tailwindcss";
 
+/* Leaflet map container fixes - override Tailwind defaults that break Leaflet */
+.leaflet-container {
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+.leaflet-pane {
+  box-sizing: border-box !important;
+}
+
+.leaflet-tile {
+  box-sizing: content-box !important;
+}
+
 :root {
   --ll-bg: #0f1419;
   --ll-fg: #f0f5f6;

@@ -1,9 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ConnectRequestButton } from "@/components/features/connect-request-button";
+import { InventoryDisplay } from "@/components/features/inventory-display";
 import { SectionCard } from "@/components/ui/section-card";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { Business } from "@/lib/types/business";
+import type { InventoryItem } from "@/lib/types/profile";
 
 type BusinessRow = {
   id: string;
@@ -19,6 +21,13 @@ type BusinessRow = {
   image_url: string | null;
 };
 
+type InventoryRow = {
+  id: string;
+  name: string;
+  quantity: string;
+  kind: "available" | "needed";
+};
+
 type PageProps = {
   params: Promise<{ id: string }>;
 };
@@ -27,6 +36,7 @@ export default async function BusinessProfilePage({ params }: PageProps) {
   const { id } = await params;
   let business: Business | null = null;
   let connectionCount = 0;
+  let inventory: InventoryItem[] = [];
 
   try {
     const supabase = await createSupabaseServerClient();
@@ -65,6 +75,21 @@ export default async function BusinessProfilePage({ params }: PageProps) {
 
           if (!countError) {
             connectionCount = count ?? 0;
+          }
+
+          const { data: inventoryData, error: inventoryError } = await supabase
+            .from("inventory_items")
+            .select("id, name, quantity, kind")
+            .eq("profile_id", row.owner_id)
+            .order("created_at", { ascending: false });
+
+          if (!inventoryError && inventoryData) {
+            inventory = inventoryData.map((item: InventoryRow) => ({
+              id: item.id,
+              name: item.name,
+              quantity: item.quantity,
+              kind: item.kind,
+            }));
           }
         }
       }
@@ -158,6 +183,13 @@ export default async function BusinessProfilePage({ params }: PageProps) {
             <p className="text-text-muted mt-1">{connectionCount}</p>
           </div>
         </div>
+      </SectionCard>
+
+      <SectionCard
+        title="Inventory Snapshot"
+        description="What this business has available for trade and what it is looking for."
+      >
+        <InventoryDisplay items={inventory} />
       </SectionCard>
 
       <SectionCard

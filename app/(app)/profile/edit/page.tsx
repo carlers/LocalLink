@@ -5,8 +5,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { InventoryEditor } from "@/components/features/inventory-editor";
 import { SectionCard } from "@/components/ui/section-card";
 import type { BusinessCategory } from "@/lib/types/business";
+import type { InventoryItem } from "@/lib/types/profile";
 
 type FormState = {
   ownerName: string;
@@ -62,6 +64,9 @@ export default function EditProfilePage() {
     string | null
   >(null);
 
+  // Inventory state
+  const [inventory, setInventory] = useState<InventoryItem[]>([]);
+
   // Delete confirmation state
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [deletePassword, setDeletePassword] = useState("");
@@ -99,6 +104,15 @@ export default function EditProfilePage() {
 
         if (businessError && businessError.code !== "PGRST116") throw businessError;
 
+        // Fetch inventory
+        const { data: inventoryData, error: inventoryError } = await supabase
+          .from("inventory_items")
+          .select("id, name, quantity, kind")
+          .eq("profile_id", userData.user.id)
+          .order("created_at", { ascending: false });
+
+        if (inventoryError) throw inventoryError;
+
         // Populate form
         if (profileData) {
           setFormData((prev) => ({
@@ -126,6 +140,17 @@ export default function EditProfilePage() {
             setCurrentBusinessImageUrl(businessData.image_url);
             setBusinessImagePreview(businessData.image_url);
           }
+        }
+
+        if (inventoryData && inventoryData.length > 0) {
+          setInventory(
+            inventoryData.map((item) => ({
+              id: item.id,
+              name: item.name,
+              quantity: item.quantity,
+              kind: item.kind as InventoryItem["kind"],
+            }))
+          );
         }
       } catch (err) {
         setError(
@@ -324,6 +349,28 @@ export default function EditProfilePage() {
         );
 
       if (businessError) throw businessError;
+
+      const { error: deleteInventoryError } = await supabase
+        .from("inventory_items")
+        .delete()
+        .eq("profile_id", userId);
+
+      if (deleteInventoryError) throw deleteInventoryError;
+
+      const inventoryToInsert = inventory.map((item) => ({
+        profile_id: userId,
+        name: item.name,
+        quantity: item.quantity,
+        kind: item.kind,
+      }));
+
+      if (inventoryToInsert.length > 0) {
+        const { error: insertInventoryError } = await supabase
+          .from("inventory_items")
+          .insert(inventoryToInsert);
+
+        if (insertInventoryError) throw insertInventoryError;
+      }
 
       setSuccessMessage("Profile saved successfully!");
       setProfileImageFile(null);
@@ -715,6 +762,17 @@ export default function EditProfilePage() {
               </p>
             </div>
           </div>
+        </SectionCard>
+
+        <SectionCard
+          title="Inventory Snapshot"
+          description="Add items you have available for trade or items you're looking for. Other businesses can see this from your public profile."
+        >
+          <InventoryEditor
+            items={inventory}
+            onItemsChange={setInventory}
+            isLoading={isSubmitting}
+          />
         </SectionCard>
 
         {/* Danger Zone Section */}

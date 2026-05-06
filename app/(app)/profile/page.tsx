@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ProfileOverview } from "@/components/features/profile-overview";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import type { ConnectedBusiness, Profile } from "@/lib/types/profile";
+import type { ConnectedBusiness, InventoryItem, Profile } from "@/lib/types/profile";
 
 type ProfileRow = {
   id: string;
@@ -60,6 +60,22 @@ export default function ProfilePage() {
       business_name?: string;
       location?: string;
     } | null;
+
+    let inventoryItems: InventoryItem[] = [];
+    const { data: inventoryData, error: inventoryError } = await supabase
+      .from("inventory_items")
+      .select("id, name, quantity, kind")
+      .eq("profile_id", currentUserId)
+      .order("created_at", { ascending: false });
+
+    if (!inventoryError && inventoryData) {
+      inventoryItems = inventoryData.map((item: InventoryItem) => ({
+        id: item.id,
+        name: item.name,
+        quantity: item.quantity,
+        kind: item.kind,
+      }));
+    }
 
     const { data: connectionsData, error: connectionsError } = await supabase
       .from("connection_requests")
@@ -126,7 +142,7 @@ export default function ProfilePage() {
       location: profileRow?.location ?? metadata?.location ?? "",
       trustScore: profileRow?.trust_score ?? 0,
       connections: connectionRows.length,
-      inventory: [],
+      inventory: inventoryItems,
       connectedBusinesses,
       profileImageUrl: profileRow?.profile_image_url ?? null,
     });
