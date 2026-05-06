@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ConnectRequestButton } from "@/components/features/connect-request-button";
 import { InventoryDisplay } from "@/components/features/inventory-display";
@@ -118,19 +119,38 @@ export default async function BusinessProfilePage({ params }: PageProps) {
       </Link>
 
       <section className="rounded-panel border-border-subtle bg-surface border p-6 shadow-sm shadow-surface-muted/40">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">{business.name}</h1>
-            <p className="text-text-muted mt-2 text-lg">
-              {business.location} • {business.category}
-            </p>
-            <p className="text-text-muted mt-4 text-base leading-relaxed">{business.shortDescription}</p>
+        <div className="grid gap-6 lg:grid-cols-[280px_1fr] lg:items-start">
+          <div className="relative aspect-[4/3] overflow-hidden rounded-3xl bg-surface-muted">
+            {business.imageUrl ? (
+              <Image
+                src={business.imageUrl}
+                alt={business.name}
+                fill
+                className="object-cover"
+                unoptimized
+              />
+            ) : (
+              <div className="flex h-full w-full items-end bg-gradient-to-br from-brand/20 via-surface-muted to-surface-muted p-5">
+                <span className="text-xs font-semibold uppercase tracking-[0.24em] text-text-muted">
+                  No business photo yet
+                </span>
+              </div>
+            )}
           </div>
-          <div className="flex flex-wrap gap-2 sm:flex-nowrap">
-            <ConnectRequestButton receiverOwnerId={business.ownerId ?? null} />
-            <button className="rounded-full border border-border-subtle bg-surface-muted px-6 py-2 font-medium text-foreground transition hover:bg-surface" type="button">
-              Message
-            </button>
+          <div className="space-y-4">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">{business.name}</h1>
+              <p className="text-text-muted mt-2 text-lg">
+                {business.location} • {business.category}
+              </p>
+              <p className="text-text-muted mt-4 text-base leading-relaxed">{business.shortDescription}</p>
+            </div>
+            <div className="flex flex-wrap gap-2 sm:flex-nowrap">
+              <ConnectRequestButton receiverOwnerId={business.ownerId ?? null} />
+              <button className="rounded-full border border-border-subtle bg-surface-muted px-6 py-2 font-medium text-foreground transition hover:bg-surface" type="button">
+                Message
+              </button>
+            </div>
           </div>
         </div>
       </section>

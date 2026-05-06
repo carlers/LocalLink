@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import dynamic from "next/dynamic";
 import { useMemo } from "react";
 import type { Business } from "@/lib/types/business";
@@ -38,15 +39,20 @@ const MapContainerInner = dynamic(
                 <Marker key={business.id} position={[coords.lat, coords.lng]}>
                   <Popup maxWidth={300}>
                     <div className="space-y-2">
-                      <p className="font-semibold text-foreground">
-                        {business.name}
-                      </p>
-                      <p className="text-sm text-text-muted">
-                        {business.location}
-                      </p>
-                      <p className="text-sm text-text-muted">
-                        {business.category}
-                      </p>
+                      {business.imageUrl ? (
+                        <div className="relative h-36 w-full overflow-hidden rounded-2xl bg-surface-muted">
+                          <Image
+                            src={business.imageUrl}
+                            alt={business.name}
+                            fill
+                            className="object-cover"
+                            unoptimized
+                          />
+                        </div>
+                      ) : null}
+                      <p className="font-semibold text-foreground">{business.name}</p>
+                      <p className="text-sm text-text-muted">{business.location}</p>
+                      <p className="text-sm text-text-muted">{business.category}</p>
                       <p className="line-clamp-3 text-sm text-text-muted">
                         {business.shortDescription}
                       </p>
