@@ -7,6 +7,7 @@ type LocationCoords = {
   lat: number;
   lng: number;
 };
+import { getBarangayCentroid } from "@/lib/constants/locations";
 
 // Common Philippine cities and regions with approximate coordinates
 const PHILIPPINES_LOCATIONS: Record<string, LocationCoords> = {
@@ -80,6 +81,17 @@ export function geocodeLocation(location: string): LocationCoords {
 
   // Default to Philippines center if no match
   return PHILIPPINES_LOCATIONS.philippines;
+}
+
+/**
+ * Geocode using explicit city and barangay when available.
+ * Returns null if not found; caller should fallback to `geocodeLocation`.
+ */
+export function geocodeCityBarangay(city?: string, barangay?: string): LocationCoords | null {
+  if (!city) return null;
+  const coords = getBarangayCentroid(city, barangay || undefined);
+  if (!coords) return null;
+  return { lat: coords.lat, lng: coords.lng };
 }
 
 /**

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ConnectRequestButton } from "@/components/features/connect-request-button";
+import { BusinessMap } from "@/components/features/business-map";
 import { InventoryDisplay } from "@/components/features/inventory-display";
 import { SectionCard } from "@/components/ui/section-card";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -11,6 +12,8 @@ type BusinessRow = {
   id: string;
   name: string;
   location: string;
+  city: string | null;
+  barangay: string | null;
   category: string;
   is_dti_registered: boolean;
   is_barter_friendly: boolean;
@@ -43,7 +46,7 @@ export default async function BusinessProfilePage({ params }: PageProps) {
     if (supabase) {
       const { data, error } = await supabase
         .from("businesses")
-        .select("id, name, location, category, is_dti_registered, is_barter_friendly, has_urgent_need, short_description, owner_id, created_at, image_url")
+        .select("id, name, location, city, barangay, category, is_dti_registered, is_barter_friendly, has_urgent_need, short_description, owner_id, created_at, image_url")
         .eq("id", id)
         .maybeSingle();
 
@@ -58,6 +61,8 @@ export default async function BusinessProfilePage({ params }: PageProps) {
           ownerId: row.owner_id,
           name: row.name,
           location: row.location,
+          city: row.city ?? undefined,
+          barangay: row.barangay ?? undefined,
           category: row.category as Business["category"],
           isDtiRegistered: row.is_dti_registered,
           isBarterFriendly: row.is_barter_friendly,
@@ -141,7 +146,7 @@ export default async function BusinessProfilePage({ params }: PageProps) {
             <div>
               <h1 className="text-3xl font-bold text-foreground">{business.name}</h1>
               <p className="text-text-muted mt-2 text-lg">
-                {business.location} • {business.category}
+                {business.barangay && business.city ? `${business.barangay}, ${business.city}` : business.location} • {business.category}
               </p>
               <p className="text-text-muted mt-4 text-base leading-relaxed">{business.shortDescription}</p>
             </div>
@@ -203,9 +208,18 @@ export default async function BusinessProfilePage({ params }: PageProps) {
           </div>
           <div>
             <p className="text-sm font-semibold text-text-muted">LOCATION</p>
-            <p className="mt-1 text-foreground">{business.location}</p>
+            <p className="mt-1 text-foreground">
+              {business.barangay && business.city ? `${business.barangay}, ${business.city}` : business.location}
+            </p>
           </div>
         </div>
+      </SectionCard>
+
+      <SectionCard
+        title="Business Map"
+        description="Approximate pin for this business and its barangay context"
+      >
+        <BusinessMap businesses={[business]} centerLocation={business.city ?? business.location} />
       </SectionCard>
     </div>
   );

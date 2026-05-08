@@ -10,6 +10,10 @@ export type Business = {
   ownerId?: string | null;
   name: string;
   location: string;
+  city?: string;
+  barangay?: string;
+  latitude?: number | null;
+  longitude?: number | null;
   category: BusinessCategory;
   isDtiRegistered: boolean;
   isBarterFriendly: boolean;
