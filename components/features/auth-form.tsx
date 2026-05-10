@@ -91,17 +91,17 @@ export function AuthForm({ mode }: AuthFormProps) {
   }
 
   return (
-    <form className="rounded-panel border-border-subtle bg-surface border p-4 sm:p-6" onSubmit={handleSubmit}>
+    <form className="rounded-panel border-border-subtle bg-surface border p-5 shadow-lg shadow-black/10 sm:p-6" onSubmit={handleSubmit}>
       {isSignup ? (
         <>
-          <label className="text-sm font-medium" htmlFor="fullName">
+          <label className="text-sm font-semibold text-white" htmlFor="fullName">
             Full name
           </label>
           <input
             id="fullName"
             name="fullName"
             type="text"
-            className="rounded-chip border-border-subtle mt-1 w-full border px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+            className="rounded-2xl border-border-subtle bg-background/80 mt-1 w-full border px-4 py-3 text-white placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
             placeholder="Juan Dela Cruz"
             value={fullName}
             onChange={(event) => setFullName(event.target.value)}
@@ -109,14 +109,14 @@ export function AuthForm({ mode }: AuthFormProps) {
             required
           />
 
-          <label className="mt-3 block text-sm font-medium" htmlFor="businessName">
+          <label className="mt-4 block text-sm font-semibold text-white" htmlFor="businessName">
             Business name
           </label>
           <input
             id="businessName"
             name="businessName"
             type="text"
-            className="rounded-chip border-border-subtle mt-1 w-full border px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+            className="rounded-2xl border-border-subtle bg-background/80 mt-1 w-full border px-4 py-3 text-white placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
             placeholder="Your business name"
             value={businessName}
             onChange={(event) => setBusinessName(event.target.value)}
@@ -124,14 +124,14 @@ export function AuthForm({ mode }: AuthFormProps) {
             required
           />
 
-          <label className="mt-3 block text-sm font-medium" htmlFor="location">
+          <label className="mt-4 block text-sm font-semibold text-white" htmlFor="location">
             Location
           </label>
           <input
             id="location"
             name="location"
             type="text"
-            className="rounded-chip border-border-subtle mt-1 w-full border px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+            className="rounded-2xl border-border-subtle bg-background/80 mt-1 w-full border px-4 py-3 text-white placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
             placeholder="City or barangay"
             value={location}
             onChange={(event) => setLocation(event.target.value)}
@@ -139,13 +139,13 @@ export function AuthForm({ mode }: AuthFormProps) {
             required
           />
 
-          <label className="mt-3 block text-sm font-medium" htmlFor="category">
+          <label className="mt-4 block text-sm font-semibold text-white" htmlFor="category">
             Business category
           </label>
           <select
             id="category"
             name="category"
-            className="rounded-chip border-border-subtle mt-1 w-full border px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+            className="rounded-2xl border-border-subtle bg-background/80 mt-1 w-full border px-4 py-3 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
             value={category}
             onChange={(event) => setCategory(event.target.value as BusinessCategory)}
             required
@@ -157,23 +157,23 @@ export function AuthForm({ mode }: AuthFormProps) {
             <option value="Other">Other</option>
           </select>
 
-          <label className="mt-3 block text-sm font-medium" htmlFor="shortDescription">
+          <label className="mt-4 block text-sm font-semibold text-white" htmlFor="shortDescription">
             Short description
           </label>
           <textarea
             id="shortDescription"
             name="shortDescription"
-            className="rounded-chip border-border-subtle mt-1 min-h-24 w-full border px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+            className="rounded-2xl border-border-subtle bg-background/80 mt-1 min-h-24 w-full border px-4 py-3 text-white placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
             placeholder="Tell others what your business offers or needs."
             value={shortDescription}
             onChange={(event) => setShortDescription(event.target.value)}
             required
           />
 
-          <div className="mt-4 space-y-3 rounded-panel border-border-subtle bg-surface-muted border p-4">
-            <p className="text-sm font-medium">Business details</p>
+          <div className="mt-5 space-y-3 rounded-panel border-border-subtle bg-surface-muted border p-4">
+            <p className="text-sm font-semibold text-white">Business details</p>
 
-            <label className="flex items-center gap-3 text-sm" htmlFor="isDtiRegistered">
+            <label className="flex items-center gap-3 text-sm text-text-muted" htmlFor="isDtiRegistered">
               <input
                 id="isDtiRegistered"
                 name="isDtiRegistered"
@@ -185,7 +185,7 @@ export function AuthForm({ mode }: AuthFormProps) {
               DTI registered
             </label>
 
-            <label className="flex items-center gap-3 text-sm" htmlFor="isBarterFriendly">
+            <label className="flex items-center gap-3 text-sm text-text-muted" htmlFor="isBarterFriendly">
               <input
                 id="isBarterFriendly"
                 name="isBarterFriendly"
@@ -197,7 +197,7 @@ export function AuthForm({ mode }: AuthFormProps) {
               Open to barter or trade
             </label>
 
-            <label className="flex items-center gap-3 text-sm" htmlFor="hasUrgentNeed">
+            <label className="flex items-center gap-3 text-sm text-text-muted" htmlFor="hasUrgentNeed">
               <input
                 id="hasUrgentNeed"
                 name="hasUrgentNeed"
@@ -212,14 +212,14 @@ export function AuthForm({ mode }: AuthFormProps) {
         </>
       ) : null}
 
-      <label className={isSignup ? "mt-3 block text-sm font-medium" : "text-sm font-medium"} htmlFor="email">
+      <label className={isSignup ? "mt-4 block text-sm font-semibold text-white" : "text-sm font-semibold text-white"} htmlFor="email">
         Email
       </label>
       <input
         id="email"
         name="email"
         type="email"
-        className="rounded-chip border-border-subtle mt-1 w-full border px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+        className="rounded-2xl border-border-subtle bg-background/80 mt-1 w-full border px-4 py-3 text-white placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
         placeholder="you@business.com"
         value={email}
         onChange={(event) => setEmail(event.target.value)}
@@ -227,14 +227,14 @@ export function AuthForm({ mode }: AuthFormProps) {
         required
       />
 
-      <label className="mt-3 block text-sm font-medium" htmlFor="password">
+      <label className="mt-4 block text-sm font-semibold text-white" htmlFor="password">
         Password
       </label>
       <input
         id="password"
         name="password"
         type="password"
-        className="rounded-chip border-border-subtle mt-1 w-full border px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+        className="rounded-2xl border-border-subtle bg-background/80 mt-1 w-full border px-4 py-3 text-white placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
         placeholder={isSignup ? "Create password" : "Enter password"}
         value={password}
         onChange={(event) => setPassword(event.target.value)}
@@ -242,12 +242,12 @@ export function AuthForm({ mode }: AuthFormProps) {
         required
       />
 
-      {errorMessage ? <p className="mt-3 text-sm text-red-600">{errorMessage}</p> : null}
+      {errorMessage ? <p className="mt-3 text-sm text-red-400">{errorMessage}</p> : null}
       {statusMessage ? <p className="mt-3 text-sm text-brand">{statusMessage}</p> : null}
 
       <button
         type="submit"
-        className="rounded-chip bg-brand mt-4 w-full px-3 py-3 text-sm font-semibold text-white disabled:opacity-60 sm:py-2.5"
+        className="rounded-2xl bg-brand mt-5 w-full px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-brand/20 transition hover:bg-brand/95 disabled:opacity-60"
         disabled={isSubmitting}
       >
         {isSubmitting ? "Please wait..." : isSignup ? "Sign Up" : "Log In"}

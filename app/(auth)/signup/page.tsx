@@ -5,18 +5,22 @@ import { routes } from "@/lib/constants/routes";
 
 export default function SignupPage() {
   return (
-    <div className="mx-auto w-full max-w-md space-y-4 px-4 pt-8 sm:pt-16">
-      <div className="flex items-center gap-3">
-        <Image src="/favicon_io/favicon-32x32.png" alt="LocalLink" width={32} height={32} className="h-8 w-8 shrink-0" priority />
-        <h1 className="text-2xl font-semibold leading-tight sm:text-3xl">Sign Up</h1>
+    <div className="mx-auto w-full max-w-md space-y-6 px-4 pt-8 pb-12 sm:px-6 sm:pt-16">
+      <div className="rounded-3xl border border-border-subtle bg-surface p-6 shadow-lg shadow-black/20 sm:p-8">
+        <div className="flex items-center gap-3">
+          <Image src="/favicon_io/android-chrome-192x192.png" alt="LocalLink" width={44} height={44} className="h-11 w-11 shrink-0" priority />
+          <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">Sign Up</h1>
+        </div>
+        <p className="mt-4 text-text-muted text-base">
+          Join your local business community with a modern and friendly platform.
+        </p>
       </div>
-      <p className="text-text-muted text-sm">Create a Supabase auth user, then store the profile data in your app flow.</p>
 
       <AuthForm mode="signup" />
 
       <p className="text-text-muted text-sm">
         Already have an account?{" "}
-        <Link href={routes.login} className="text-brand font-medium">
+        <Link href={routes.login} className="text-brand font-semibold hover:text-white">
           Log in here
         </Link>
       </p>

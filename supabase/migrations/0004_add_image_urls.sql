@@ -13,16 +13,9 @@ alter table if exists public.businesses
 create index if not exists profiles_profile_image_url_idx on public.profiles (profile_image_url);
 create index if not exists businesses_image_url_idx on public.businesses (image_url);
 
--- Notes for Storage setup (manual via Supabase dashboard):
--- 1. Create bucket "profile-images" for owner profile pictures
---    - Allow public read access (download)
---    - Restrict uploads/deletes to authenticated users via RLS
---    - Path pattern: profile-images/{user_id}/*
---
--- 2. Create bucket "business-images" for business photos
---    - Allow public read access (download)
---    - Restrict uploads/deletes to authenticated users via RLS
---    - Path pattern: business-images/{user_id}/*
+-- Notes for Storage setup:
+-- Buckets and object policies are provisioned in 0006_add_storage_buckets.sql.
+-- The runtime ensure route is only a fallback for older environments.
 --
 -- RLS Policy for profile-images bucket:
 --   authenticated users can upload/delete only files in their own user_id path
