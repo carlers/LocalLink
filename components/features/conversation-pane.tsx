@@ -163,7 +163,30 @@ export function ConversationPane({ conversationId, compact = false, onBackToInbo
   }, [loadConversation]);
 
   const handleNewMessage = useCallback((message: Message) => {
-    setMessages((prevMessages) => [...prevMessages, toMessageRow(message)]);
+    setMessages((prevMessages) => {
+      if (prevMessages.some((msg) => msg.id === message.id)) {
+        return prevMessages;
+      }
+
+      const replaced = prevMessages.map((msg) => {
+        if (
+          msg.id.startsWith('temp-') &&
+          msg.sender_name === message.senderName &&
+          msg.preview === message.preview &&
+          msg.sent_at === message.sentAt
+        ) {
+          return toMessageRow(message);
+        }
+
+        return msg;
+      });
+
+      if (replaced.some((msg) => msg.id === message.id)) {
+        return replaced;
+      }
+
+      return [...replaced, toMessageRow(message)];
+    });
   }, []);
 
   const handleMessageUpdated = useCallback((updatedMessage: Message) => {

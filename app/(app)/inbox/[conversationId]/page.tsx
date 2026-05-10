@@ -1,11 +1,10 @@
 import { InboxWorkspace } from '@/components/features/inbox-workspace';
 
-type ConversationPageProps = {
-  params: {
-    conversationId: string;
-  };
+type PageProps = {
+  params: Promise<{ conversationId: string }>;
 };
 
-export default function ConversationPage({ params }: ConversationPageProps) {
-  return <InboxWorkspace initialConversationId={params.conversationId} />;
+export default async function ConversationPage({ params }: PageProps) {
+  const { conversationId } = await params;
+  return <InboxWorkspace initialConversationId={conversationId} />;
 }

@@ -18,59 +18,56 @@ export function useRealtimeMessages(
 
     const supabase = createSupabaseBrowserClient();
 
-    // Subscribe to INSERT events for new messages
-    const insertSubscription = supabase
-      .channel(`messages:conversation_id=eq.${conversationId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-          filter: `conversation_id=eq.${conversationId}`,
-        },
-        (payload) => {
-          const newMessage: Message = {
-            id: payload.new.id,
-            conversationId: payload.new.conversation_id,
-            senderName: payload.new.sender_name,
-            preview: payload.new.preview,
-            sentAt: payload.new.sent_at,
-            isUnread: payload.new.is_unread,
-          };
-          onNewMessage(newMessage);
-        }
-      )
-      .subscribe();
+    const insertChannel = supabase.channel(`messages:conversation_id=eq.${conversationId}`);
+    insertChannel.on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'messages',
+        filter: `conversation_id=eq.${conversationId}`,
+      },
+      (payload) => {
+        const newMessage: Message = {
+          id: payload.new.id,
+          conversationId: payload.new.conversation_id,
+          senderName: payload.new.sender_name,
+          preview: payload.new.preview,
+          sentAt: payload.new.sent_at,
+          isUnread: payload.new.is_unread,
+        };
+        onNewMessage(newMessage);
+      }
+    );
 
-    // Subscribe to UPDATE events for read status changes
-    const updateSubscription = supabase
-      .channel(`messages-update:conversation_id=eq.${conversationId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'messages',
-          filter: `conversation_id=eq.${conversationId}`,
-        },
-        (payload) => {
-          const updatedMessage: Message = {
-            id: payload.new.id,
-            conversationId: payload.new.conversation_id,
-            senderName: payload.new.sender_name,
-            preview: payload.new.preview,
-            sentAt: payload.new.sent_at,
-            isUnread: payload.new.is_unread,
-          };
-          onMessageUpdated(updatedMessage);
-        }
-      )
-      .subscribe();
+    const updateChannel = supabase.channel(`messages-update:conversation_id=eq.${conversationId}`);
+    updateChannel.on(
+      'postgres_changes',
+      {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'messages',
+        filter: `conversation_id=eq.${conversationId}`,
+      },
+      (payload) => {
+        const updatedMessage: Message = {
+          id: payload.new.id,
+          conversationId: payload.new.conversation_id,
+          senderName: payload.new.sender_name,
+          preview: payload.new.preview,
+          sentAt: payload.new.sent_at,
+          isUnread: payload.new.is_unread,
+        };
+        onMessageUpdated(updatedMessage);
+      }
+    );
+
+    void insertChannel.subscribe();
+    void updateChannel.subscribe();
 
     return () => {
-      supabase.removeChannel(insertSubscription);
-      supabase.removeChannel(updateSubscription);
+      supabase.removeChannel(insertChannel);
+      supabase.removeChannel(updateChannel);
     };
   }, [conversationId, onNewMessage, onMessageUpdated]);
 }
