@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
 
 /* Leaflet map container fixes - override Tailwind defaults that break Leaflet */
 .leaflet-container {
@@ -11,7 +12,44 @@
 }
 
 .leaflet-tile {
-  box-sizing: content-box !important;
+  box-sizing: border-box !important;
+}
+
+.custom-leaflet-marker-icon {
+  background: transparent !important;
+  border: none !important;
+}
+
+.custom-pin {
+  width: 52px;
+  height: 52px;
+  border-radius: 9999px;
+  border: 2px solid white;
+  box-shadow: 0 0 0 2px rgba(8, 145, 178, 0.15);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: white;
+  background-color: #008080;
+  text-align: center;
+}
+
+.custom-pin-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.custom-pin-fallback {
+  background: linear-gradient(135deg, #06928d 0%, #008080 100%);
+}
+
+.custom-pin-fallback span {
+  padding: 0 6px;
+  line-height: 1;
 }
 
 :root {

@@ -3,14 +3,25 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import type { Business } from "@/lib/types/business";
 import { geocodeLocation, geocodeCityBarangay } from "@/lib/utils/geocoding";
 
 const MapContainerInner = dynamic(
   () =>
-    import("react-leaflet").then((mod) => {
-      const { MapContainer, TileLayer, Marker, Popup } = mod;
+    Promise.all([import("react-leaflet"), import("leaflet")]).then(([mod, L]) => {
+      const { MapContainer, TileLayer, Marker, Popup, useMap } = mod;
+      const { divIcon } = L;
+
+      function MapResizeFix() {
+        const map = useMap();
+
+        useEffect(() => {
+          map.invalidateSize();
+        }, [map]);
+
+        return null;
+      }
 
       return function DynamicMap({
         centerCoords,
@@ -25,6 +36,52 @@ const MapContainerInner = dynamic(
         const formatLocation = (business: Business) =>
           business.city && business.barangay ? `${business.barangay}, ${business.city}` : business.location;
 
+        const escapeHtml = (value: string) =>
+          value
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+
+        const getInitials = (name: string) => {
+          const parts = name
+            .trim()
+            .split(/\s+/)
+            .filter(Boolean)
+            .slice(0, 2)
+            .map((part) => part[0].toUpperCase());
+          return parts.join("") || "?";
+        };
+
+        const createMarkerIcon = (business: Business) => {
+          if (business.imageUrl) {
+            return divIcon({
+              className: "custom-leaflet-marker-icon",
+              html: `
+                <div class="custom-pin custom-pin-image">
+                  <img src="${escapeHtml(business.imageUrl)}" alt="${escapeHtml(business.name)}" />
+                </div>
+              `,
+              iconSize: [52, 52],
+              iconAnchor: [26, 52],
+              popupAnchor: [0, -50],
+            });
+          }
+
+          return divIcon({
+            className: "custom-leaflet-marker-icon",
+            html: `
+              <div class="custom-pin custom-pin-fallback">
+                <span>${escapeHtml(getInitials(business.name))}</span>
+              </div>
+            `,
+            iconSize: [52, 52],
+            iconAnchor: [26, 52],
+            popupAnchor: [0, -50],
+          });
+        };
+
         return (
           <MapContainer
             center={[centerCoords.lat, centerCoords.lng]}
@@ -37,6 +94,7 @@ const MapContainerInner = dynamic(
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
+            <MapResizeFix />
 
             {displayBusinesses.map((business) => {
               // Determine coords: prefer explicit lat/lng, then city+barangay centroid, then free-text location
@@ -70,7 +128,11 @@ const MapContainerInner = dynamic(
               const finalCoords = deterministicJitter(business.id, coords.lat, coords.lng);
 
               return (
-                <Marker key={business.id} position={[finalCoords.lat, finalCoords.lng]}>
+                <Marker
+                  key={business.id}
+                  position={[finalCoords.lat, finalCoords.lng]}
+                  icon={createMarkerIcon(business)}
+                >
                   <Popup maxWidth={300}>
                     <div className="space-y-2">
                       {business.imageUrl ? (
