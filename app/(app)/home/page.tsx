@@ -42,6 +42,7 @@ export default function HomePage() {
   const [businessName, setBusinessName] = useState("Your business");
   const [ownerName, setOwnerName] = useState("Business owner");
   const [businessLocation, setBusinessLocation] = useState("Your area");
+  const [businessImageUrl, setBusinessImageUrl] = useState<string | null>(null);
   const [stats, setStats] = useState({ total: 0, urgent: 0, barter: 0 });
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [connectionStates, setConnectionStates] = useState<Record<string, BusinessConnectionState>>({});
@@ -305,6 +306,16 @@ export default function HomePage() {
           setBusinessName(metadata?.business_name ?? "Your business");
           setBusinessLocation(metadata?.location ?? "Your area");
           location = metadata?.location ?? "";
+
+          const { data: businessData, error: businessError } = await supabase
+            .from("businesses")
+            .select("image_url")
+            .eq("owner_id", data.user.id)
+            .single();
+
+          if (!businessError && businessData?.image_url) {
+            setBusinessImageUrl(businessData.image_url);
+          }
         }
       } catch {
         // Keep defaults if user metadata is unavailable.
@@ -349,10 +360,25 @@ export default function HomePage() {
         <aside className="space-y-6">
           <SectionCard title="Business summary">
             <div className="space-y-4">
-              <div className="rounded-panel border-border-subtle bg-surface border p-4">
-                <p className="text-sm text-text-muted">Business</p>
-                <p className="mt-2 text-lg font-semibold text-foreground">{businessName}</p>
-                <p className="mt-1 text-sm text-text-muted">{businessLocation}</p>
+              <div className="rounded-panel border-border-subtle bg-surface border p-4 space-y-4">
+                {businessImageUrl ? (
+                  <div className="overflow-hidden rounded-3xl bg-surface-muted">
+                    <img
+                      src={businessImageUrl}
+                      alt={`Photo of ${businessName}`}
+                      className="h-36 w-full object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="flex h-36 items-center justify-center rounded-3xl bg-surface-muted text-sm text-text-muted">
+                    No business photo yet
+                  </div>
+                )}
+                <div>
+                  <p className="text-sm text-text-muted">Business</p>
+                  <p className="mt-2 text-lg font-semibold text-foreground">{businessName}</p>
+                  <p className="mt-1 text-sm text-text-muted">{businessLocation}</p>
+                </div>
               </div>
 
               <div className="rounded-panel border-border-subtle bg-surface border p-4">
