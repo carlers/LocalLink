@@ -1,21 +1,38 @@
 @import "tailwindcss";
-@import "leaflet/dist/leaflet.css";
+
+/* Leaflet map container fixes - override Tailwind defaults that break Leaflet */
+.leaflet-container {
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+.leaflet-pane {
+  box-sizing: border-box !important;
+}
+
+.leaflet-tile {
+  box-sizing: content-box !important;
+}
 
 :root {
-  --ll-bg: #ffffff;
-  --ll-fg: #171717;
-  --ll-brand: #008080;
-  --ll-surface: #ffffff;
-  --ll-surface-muted: #f5f5f5;
-  --ll-border-subtle: #d6dddd;
-  --ll-text-muted: #5a6666;
-  --ll-accent-urgent: #ffd700;
-  --ll-status-success-bg: #e8f7f1;
-  --ll-status-success-fg: #0f766e;
-  --ll-status-error-bg: #fdecec;
-  --ll-status-error-fg: #b42318;
-  --ll-status-neutral-bg: #f3f4f6;
-  --ll-status-neutral-fg: #4b5563;
+  --ll-bg: #0f1419;
+  --ll-fg: #f0f5f6;
+  --ll-brand: #487b7a;
+  --ll-surface: #172022;
+  --ll-surface-muted: #131a1c;
+  --ll-border-subtle: #24303a;
+  --ll-text-muted: #a8b8c0;
+  --ll-accent-urgent: #f59e0b;
+  --ll-status-success-bg: #0b281e;
+  --ll-status-success-fg: #8df1d3;
+  --ll-status-error-bg: #3c1418;
+  --ll-status-error-fg: #fb7185;
+  --ll-status-neutral-bg: #1f272f;
+  --ll-status-neutral-fg: #c2ccd1;
+  --radius-panel: 1rem;
+  --radius-chip: 0.75rem;
+  --font-sans: var(--font-bricolage);
+  --font-mono: var(--font-geist-mono);
 }
 
 @theme inline {
@@ -35,8 +52,31 @@
   --color-status-neutral-fg: var(--ll-status-neutral-fg);
   --radius-panel: 1rem;
   --radius-chip: 0.75rem;
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-bricolage);
   --font-mono: var(--font-geist-mono);
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--ll-bg);
+  color: var(--ll-fg);
+  font-family: var(--font-sans), Inter, system-ui, sans-serif;
+  min-height: 100vh;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -54,10 +94,4 @@
     --ll-status-neutral-bg: #1f2727;
     --ll-status-neutral-fg: #c8d0d0;
   }
-}
-
-body {
-  background: var(--ll-bg);
-  color: var(--ll-fg);
-  font-family: var(--font-geist-sans), "Segoe UI", sans-serif;
 }
