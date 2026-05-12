@@ -23,59 +23,57 @@ export function useRealtimeNotifications(
     const supabase = createSupabaseBrowserClient();
 
     // Subscribe to INSERT events for new notifications
-    const insertSubscription = supabase
-      .channel(`notifications:profile_id=eq.${profileId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'notifications',
-          filter: `profile_id=eq.${profileId}`,
-        },
-        (payload) => {
-          if (!isMountedRef.current) return;
-          const newNotification: Notification = {
-            id: payload.new.id,
-            title: payload.new.title,
-            detail: payload.new.detail,
-            createdAt: payload.new.created_at,
-            isRead: payload.new.is_read,
-          };
-          onNewNotification(newNotification);
-        }
-      )
-      .subscribe();
+    const insertChannel = supabase.channel(`notifications:profile_id=eq.${profileId}`);
+    insertChannel.on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'notifications',
+        filter: `profile_id=eq.${profileId}`,
+      },
+      (payload) => {
+        if (!isMountedRef.current) return;
+        const newNotification: Notification = {
+          id: payload.new.id,
+          title: payload.new.title,
+          detail: payload.new.detail,
+          createdAt: payload.new.created_at,
+          isRead: payload.new.is_read,
+        };
+        onNewNotification(newNotification);
+      }
+    );
 
-    // Subscribe to UPDATE events for notification status changes
-    const updateSubscription = supabase
-      .channel(`notifications-update:profile_id=eq.${profileId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'notifications',
-          filter: `profile_id=eq.${profileId}`,
-        },
-        (payload) => {
-          if (!isMountedRef.current) return;
-          const updatedNotification: Notification = {
-            id: payload.new.id,
-            title: payload.new.title,
-            detail: payload.new.detail,
-            createdAt: payload.new.created_at,
-            isRead: payload.new.is_read,
-          };
-          onNotificationUpdated(updatedNotification);
-        }
-      )
-      .subscribe();
+    const updateChannel = supabase.channel(`notifications-update:profile_id=eq.${profileId}`);
+    updateChannel.on(
+      'postgres_changes',
+      {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'notifications',
+        filter: `profile_id=eq.${profileId}`,
+      },
+      (payload) => {
+        if (!isMountedRef.current) return;
+        const updatedNotification: Notification = {
+          id: payload.new.id,
+          title: payload.new.title,
+          detail: payload.new.detail,
+          createdAt: payload.new.created_at,
+          isRead: payload.new.is_read,
+        };
+        onNotificationUpdated(updatedNotification);
+      }
+    );
+
+    void insertChannel.subscribe();
+    void updateChannel.subscribe();
 
     return () => {
       isMountedRef.current = false;
-      supabase.removeChannel(insertSubscription);
-      supabase.removeChannel(updateSubscription);
+      supabase.removeChannel(insertChannel);
+      supabase.removeChannel(updateChannel);
     };
   }, [profileId, onNewNotification, onNotificationUpdated]);
 

@@ -19,56 +19,54 @@ export function useRealtimeConversations(
     const supabase = createSupabaseBrowserClient();
 
     // Subscribe to INSERT events for new conversations
-    const insertSubscription = supabase
-      .channel(`conversations:profile_id=eq.${profileId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'conversations',
-          filter: `profile_id=eq.${profileId}`,
-        },
-        (payload) => {
-          const newConversation: Conversation = {
-            id: payload.new.id,
-            partnerName: payload.new.partner_name,
-            lastMessagePreview: payload.new.last_message_preview,
-            lastMessageAt: payload.new.last_message_at,
-            unreadCount: 0,
-          };
-          onNewConversation(newConversation);
-        }
-      )
-      .subscribe();
+    const insertChannel = supabase.channel(`conversations:profile_id=eq.${profileId}`);
+    insertChannel.on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'conversations',
+        filter: `profile_id=eq.${profileId}`,
+      },
+      (payload) => {
+        const newConversation: Conversation = {
+          id: payload.new.id,
+          partnerName: payload.new.partner_name,
+          lastMessagePreview: payload.new.last_message_preview,
+          lastMessageAt: payload.new.last_message_at,
+          unreadCount: 0,
+        };
+        onNewConversation(newConversation);
+      }
+    );
 
-    // Subscribe to UPDATE events for conversation changes
-    const updateSubscription = supabase
-      .channel(`conversations-update:profile_id=eq.${profileId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'conversations',
-          filter: `profile_id=eq.${profileId}`,
-        },
-        (payload) => {
-          const updatedConversation: Conversation = {
-            id: payload.new.id,
-            partnerName: payload.new.partner_name,
-            lastMessagePreview: payload.new.last_message_preview,
-            lastMessageAt: payload.new.last_message_at,
-            unreadCount: 0,
-          };
-          onConversationUpdated(updatedConversation);
-        }
-      )
-      .subscribe();
+    const updateChannel = supabase.channel(`conversations-update:profile_id=eq.${profileId}`);
+    updateChannel.on(
+      'postgres_changes',
+      {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'conversations',
+        filter: `profile_id=eq.${profileId}`,
+      },
+      (payload) => {
+        const updatedConversation: Conversation = {
+          id: payload.new.id,
+          partnerName: payload.new.partner_name,
+          lastMessagePreview: payload.new.last_message_preview,
+          lastMessageAt: payload.new.last_message_at,
+          unreadCount: 0,
+        };
+        onConversationUpdated(updatedConversation);
+      }
+    );
+
+    void insertChannel.subscribe();
+    void updateChannel.subscribe();
 
     return () => {
-      supabase.removeChannel(insertSubscription);
-      supabase.removeChannel(updateSubscription);
+      supabase.removeChannel(insertChannel);
+      supabase.removeChannel(updateChannel);
     };
   }, [profileId, onNewConversation, onConversationUpdated]);
 }
