@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { routes } from '@/lib/constants/routes';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { useRealtimeMessages } from '@/lib/hooks/useRealtimeMessages';
+import { Spinner } from '@/components/ui/spinner';
+import { ConversationLoadingFallback } from '@/components/features/conversation-loading-fallback';
 import type { Message } from '@/lib/types/message';
 
 type ConversationRow = {
@@ -326,7 +328,7 @@ export function ConversationPane({ conversationId, compact = false, onBackToInbo
       <div className="mt-4 flex min-h-0 flex-1 flex-col gap-4 overflow-hidden">
         <div className="min-h-0 flex-1 overflow-y-auto pr-1">
           {loading ? (
-            <p className="text-text-muted text-sm">Loading conversation...</p>
+            <ConversationLoadingFallback messageCount={4} />
           ) : messages.length === 0 ? (
             <p className="text-text-muted text-sm">No messages yet. Start the conversation below.</p>
           ) : (
@@ -368,9 +370,15 @@ export function ConversationPane({ conversationId, compact = false, onBackToInbo
               type="button"
               onClick={() => void sendMessage()}
               disabled={sending || draft.trim().length === 0}
-              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full border border-brand bg-brand px-3.5 py-1.5 text-xs font-semibold text-white transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-70"
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full border border-brand bg-brand px-3.5 py-1.5 text-xs font-semibold text-white transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-70 flex items-center justify-center gap-1"
             >
-              {sending ? 'Sending...' : 'Send'}
+              {sending ? (
+                <>
+                  <Spinner size="sm" color="white" ariaLabel="Sending message" />
+                </>
+              ) : (
+                'Send'
+              )}
             </button>
           </div>
         </div>

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import Link from "next/link";
+import { Spinner } from "@/components/ui/spinner";
 import type { Business } from "@/lib/types/business";
 import type { BusinessConnectionState } from "@/lib/types/connection";
 
@@ -111,7 +112,7 @@ export function BusinessList({
                   </Link>
                 ) : (
                   <button
-                    className="rounded-xl border border-border-subtle bg-surface-muted px-4 py-2 text-xs font-medium text-foreground transition hover:bg-surface disabled:cursor-not-allowed disabled:opacity-70"
+                    className="rounded-xl border border-border-subtle bg-surface-muted px-4 py-2 text-xs font-medium text-foreground transition hover:bg-surface disabled:cursor-not-allowed disabled:opacity-70 flex items-center justify-center gap-1.5"
                     type="button"
                     disabled={!business.ownerId || connectLoadingBusinessId === business.id}
                     onClick={() => {
@@ -124,15 +125,13 @@ export function BusinessList({
                       void onConnect(business, connectionState);
                     }}
                   >
-                    {connectLoadingBusinessId === business.id
-                      ? connectionState === "pending-outgoing"
-                        ? "Cancelling..."
-                        : connectionState === "connected"
-                          ? "Disconnecting..."
-                          : "Sending..."
-                      : isConfirmingDisconnect
-                        ? "Confirm disconnect"
-                        : resolveConnectLabel(connectionState)}
+                    {connectLoadingBusinessId === business.id ? (
+                      <Spinner size="sm" color="muted" ariaLabel="Processing request" />
+                    ) : isConfirmingDisconnect ? (
+                      "Confirm disconnect"
+                    ) : (
+                      resolveConnectLabel(connectionState)
+                    )}
                   </button>
                 )}
               </div>
