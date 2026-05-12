@@ -63,8 +63,8 @@ export function SkeletonCard({
         <SkeletonText lines={textLines} width="w-full" gap="gap-2" />
       </div>
       <div className="flex gap-2 pt-2">
-        <Skeleton width="w-full" height="h-9" rounded="rounded-chip" />
-        <Skeleton width="w-full" height="h-9" rounded="rounded-chip" />
+        <Skeleton width="w-full" height="h-9" rounded="rounded-lg" />
+        <Skeleton width="w-full" height="h-9" rounded="rounded-lg" />
       </div>
     </div>
   );
