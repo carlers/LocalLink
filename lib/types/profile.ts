@@ -11,6 +11,8 @@ export type ConnectedBusiness = {
   ownerName: string;
   businessName: string;
   location: string;
+  city?: string;
+  barangay?: string;
 };
 
 export type Profile = {
@@ -18,6 +20,8 @@ export type Profile = {
   ownerName: string;
   businessName: string;
   location: string;
+  city?: string;
+  barangay?: string;
   trustScore: number;
   connections: number;
   inventory: InventoryItem[];

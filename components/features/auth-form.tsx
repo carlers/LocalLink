@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { routes } from "@/lib/constants/routes";
 import type { BusinessCategory } from "@/lib/types/business";
+import { getCities, getBarangaysForCity } from "@/lib/constants/locations";
 
 type AuthMode = "login" | "signup";
 
@@ -16,7 +17,8 @@ export function AuthForm({ mode }: AuthFormProps) {
   const router = useRouter();
   const [fullName, setFullName] = useState("");
   const [businessName, setBusinessName] = useState("");
-  const [location, setLocation] = useState("");
+  const [city, setCity] = useState("");
+  const [barangay, setBarangay] = useState("");
   const [category, setCategory] = useState<BusinessCategory>("Retail");
   const [shortDescription, setShortDescription] = useState("");
   const [isDtiRegistered, setIsDtiRegistered] = useState(false);
@@ -47,7 +49,9 @@ export function AuthForm({ mode }: AuthFormProps) {
             data: {
               full_name: fullName,
               business_name: businessName,
-              location,
+              location: `${barangay}, ${city}`,
+              city,
+              barangay,
               business_category: category,
               short_description: shortDescription,
               business_is_dti_registered: String(isDtiRegistered),
@@ -124,20 +128,48 @@ export function AuthForm({ mode }: AuthFormProps) {
             required
           />
 
-          <label className="mt-4 block text-sm font-semibold text-white" htmlFor="location">
-            Location
+          <label className="mt-4 block text-sm font-semibold text-white" htmlFor="city">
+            City
           </label>
-          <input
-            id="location"
-            name="location"
-            type="text"
-            className="rounded-2xl border-border-subtle bg-background/80 mt-1 w-full border px-4 py-3 text-white placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
-            placeholder="City or barangay"
-            value={location}
-            onChange={(event) => setLocation(event.target.value)}
-            autoComplete="address-level2"
+          <select
+            id="city"
+            name="city"
+            className="rounded-2xl border-border-subtle bg-background/80 mt-1 w-full border px-4 py-3 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+            value={city}
+            onChange={(event) => {
+              setCity(event.target.value);
+              setBarangay("");
+            }}
             required
-          />
+          >
+            <option value="">Select city</option>
+            {getCities().map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+
+          <label className="mt-4 block text-sm font-semibold text-white" htmlFor="barangay">
+            Barangay
+          </label>
+          <select
+            id="barangay"
+            name="barangay"
+            className="rounded-2xl border-border-subtle bg-background/80 mt-1 w-full border px-4 py-3 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+            value={barangay}
+            onChange={(event) => setBarangay(event.target.value)}
+            required
+          >
+            <option value="">Select barangay</option>
+            {city
+              ? getBarangaysForCity(city).map((b) => (
+                <option key={b} value={b}>
+                  {b}
+                </option>
+              ))
+              : null}
+          </select>
 
           <label className="mt-4 block text-sm font-semibold text-white" htmlFor="category">
             Business category

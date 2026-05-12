@@ -26,6 +26,8 @@ export default function DiscoverPage() {
   const [connectLoadingBusinessId, setConnectLoadingBusinessId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"list" | "map">("map");
   const [userLocation, setUserLocation] = useState<string>("manila");
+  const [selectedCity, setSelectedCity] = useState<string>("");
+  const [selectedBarangay, setSelectedBarangay] = useState<string>("");
 
   const hydrateConnectionStates = async (
     userId: string,
@@ -100,15 +102,21 @@ export default function DiscoverPage() {
   const fetchBusinesses = async (
     searchQuery: string,
     category: string,
-    location: string
+    city: string,
+    barangay: string
   ) => {
     setIsLoading(true);
     setError(null);
     setResultSummary("Searching businesses...");
 
-    if (location) {
-      setUserLocation(location);
+    if (barangay && city) {
+      setUserLocation(`${barangay}, ${city}`);
+    } else if (city) {
+      setUserLocation(city);
     }
+
+    setSelectedCity(city);
+    setSelectedBarangay(barangay);
 
     try {
       const supabase = createSupabaseBrowserClient();
@@ -116,7 +124,7 @@ export default function DiscoverPage() {
       let query = supabase
         .from("businesses")
         .select(
-          "id, owner_id, name, location, category, is_dti_registered, is_barter_friendly, has_urgent_need, short_description, image_url",
+          "id, owner_id, name, location, city, barangay, category, is_dti_registered, is_barter_friendly, has_urgent_need, short_description, image_url",
         )
         .order("created_at", { ascending: false });
 
@@ -130,8 +138,12 @@ export default function DiscoverPage() {
         query = query.eq("category", category);
       }
 
-      if (location) {
-        query = query.ilike("location", `%${location}%`);
+      if (city) {
+        query = query.eq("city", city);
+      }
+
+      if (barangay) {
+        query = query.eq("barangay", barangay);
       }
 
       // Exclude the current user's own business from results
@@ -157,6 +169,8 @@ export default function DiscoverPage() {
         ownerId: row.owner_id,
         name: row.name,
         location: row.location,
+        city: row.city ?? undefined,
+        barangay: row.barangay ?? undefined,
         category: row.category as Business["category"],
         isDtiRegistered: row.is_dti_registered,
         isBarterFriendly: row.is_barter_friendly,
@@ -268,7 +282,7 @@ export default function DiscoverPage() {
 
   useEffect(() => {
     const loadBusinesses = async () => {
-      await fetchBusinesses("", "", "");
+      await fetchBusinesses("", "", "", "");
     };
 
     void loadBusinesses();
@@ -331,7 +345,7 @@ export default function DiscoverPage() {
             <div className="rounded-panel border-border-subtle border shadow-sm overflow-hidden">
               <BusinessMap
                 businesses={businesses}
-                centerLocation={userLocation}
+                centerLocation={selectedBarangay && selectedCity ? `${selectedBarangay}, ${selectedCity}` : userLocation}
                 onBusinessSelect={(business) => {
                   console.log("Selected business:", business);
                 }}
