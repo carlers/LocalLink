@@ -113,10 +113,7 @@ export function DiscoverSearch({ onFilter, isLoading = false }: DiscoverSearchPr
             <button
               key={category}
               onClick={() => handleCategoryChange(category)}
-              className={`rounded-chip border px-3 py-3 text-sm transition-colors sm:py-2 ${selectedCategory === category
-                ? "border-brand bg-brand text-white"
-                : "border-border-subtle bg-surface-muted text-foreground hover:bg-surface"
-                }`}
+              className={`btn-secondary ${selectedCategory === category ? 'btn-primary' : ''}`}
               disabled={isLoading}
               type="button"
             >

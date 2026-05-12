@@ -60,14 +60,14 @@ export function InboxColumns({
                     {request.businessId ? (
                       <a
                         href={`/business/${request.businessId}`}
-                        className="rounded-full border border-border-subtle bg-surface px-3 py-1.5 text-xs font-medium text-foreground transition hover:bg-surface-muted"
+                        className="btn-secondary text-xs px-3 py-1.5"
                       >
                         View profile
                       </a>
                     ) : null}
                     <button
                       type="button"
-                      className="rounded-full border border-brand bg-brand px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-70 flex items-center justify-center gap-1"
+                      className="btn-primary text-xs px-3 py-1.5 disabled:cursor-not-allowed disabled:opacity-70 flex items-center justify-center gap-1"
                       disabled={actionLoadingRequestId === request.id}
                       onClick={() => {
                         if (!onAcceptRequest) {
@@ -85,7 +85,7 @@ export function InboxColumns({
                     </button>
                     <button
                       type="button"
-                      className="rounded-full border border-border-subtle bg-surface px-3 py-1.5 text-xs font-medium text-foreground transition hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-70"
+                      className="btn-secondary text-xs px-3 py-1.5 disabled:cursor-not-allowed disabled:opacity-70"
                       disabled={actionLoadingRequestId === request.id}
                       onClick={() => {
                         if (!onRejectRequest) {
@@ -131,7 +131,7 @@ export function InboxColumns({
                     {onMarkNotificationRead && !notification.isRead ? (
                       <button
                         type="button"
-                        className="text-brand rounded-full border border-brand/30 px-3 py-1 text-xs font-medium transition hover:bg-brand/10 disabled:cursor-not-allowed disabled:opacity-70 flex items-center justify-center gap-1"
+                        className="btn-secondary text-xs px-3 py-1 disabled:cursor-not-allowed disabled:opacity-70 flex items-center justify-center gap-1"
                         disabled={notificationActionLoadingId === notification.id}
                         onClick={() => {
                           void onMarkNotificationRead(notification.id);
@@ -147,7 +147,7 @@ export function InboxColumns({
                     {onDismissNotification ? (
                       <button
                         type="button"
-                        className="rounded-full border border-border-subtle px-3 py-1 text-xs font-medium text-foreground transition hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-70 flex items-center justify-center gap-1"
+                        className="btn-secondary text-xs px-3 py-1 disabled:cursor-not-allowed disabled:opacity-70 flex items-center justify-center gap-1"
                         disabled={notificationActionLoadingId === notification.id}
                         onClick={() => {
                           void onDismissNotification(notification.id);
@@ -168,33 +168,13 @@ export function InboxColumns({
         </section>
       </div>
 
-      <section className="rounded-panel border-border-subtle bg-surface flex min-h-0 flex-1 flex-col border p-2.5 sm:p-3 lg:p-4">
-        {/* On mobile: show list OR chat depending on selection. On desktop: show both */}
-        {selectedConversationId ? (
-          // Selected: show chat full-width on mobile, right side on desktop
-          <div className="flex min-h-0 flex-1 flex-col gap-4 xl:grid xl:grid-cols-[320px_minmax(0,1fr)]">
-            {/* Desktop only: show list on the left */}
-            <div className="hidden rounded-panel border-border-subtle bg-surface-muted flex-col border p-3 sm:p-3.5 xl:flex xl:p-4 min-h-0 flex-1">
-              <h2 className="text-foreground text-lg font-semibold">Conversations</h2>
-              <div className="mt-3 min-h-0 flex-1 overflow-y-auto pr-1">
-                <ConversationList
-                  conversations={conversations}
-                  selectedConversationId={selectedConversationId}
-                  onSelectConversation={onSelectConversation}
-                />
-              </div>
-            </div>
-
-            {/* Chat pane: takes full width on mobile, right side on desktop */}
-            <div className="min-h-0 flex-1 overflow-hidden">
-              <ConversationPane conversationId={selectedConversationId} compact onBackToInbox={onBackToInbox} />
-            </div>
-          </div>
-        ) : (
-          // Not selected: show list full-width
-          <div className="rounded-panel border-border-subtle bg-surface-muted flex min-h-0 flex-1 flex-col border p-3 sm:p-3.5 lg:p-4">
-            <h2 className="text-foreground text-lg font-semibold">Conversations</h2>
-            <div className="mt-3 min-h-0 flex-1 overflow-y-auto pr-1">
+      <section className="rounded-panel border-border-subtle bg-surface flex flex-1 flex-col border p-2.5 sm:p-3 lg:p-4 min-h-0">
+        {/* Always show sidebar on desktop, chat takes remaining space */}
+        <div className="flex min-h-0 flex-1 gap-4 xl:grid xl:grid-cols-[300px_minmax(0,1fr)]">
+          {/* Conversation sidebar: always visible on desktop */}
+          <div className="rounded-panel border-border-subtle bg-surface-muted flex-col border p-3 sm:p-3.5 xl:flex xl:p-4 min-h-0 flex-1 max-h-full">
+            <h2 className="text-foreground text-lg font-semibold mb-3">Conversations</h2>
+            <div className="min-h-0 flex-1 overflow-y-auto pr-1">
               <ConversationList
                 conversations={conversations}
                 selectedConversationId={selectedConversationId}
@@ -202,7 +182,24 @@ export function InboxColumns({
               />
             </div>
           </div>
-        )}
+
+          {/* Chat pane: takes full width on mobile when selected, right side on desktop */}
+          <div className="min-h-0 flex-1 overflow-hidden xl:block">
+            {selectedConversationId ? (
+              <div className="h-full min-h-0">
+                <ConversationPane conversationId={selectedConversationId} onBackToInbox={onBackToInbox} />
+              </div>
+            ) : (
+              <div className="flex min-h-0 flex-1 items-center justify-center rounded-panel border-2 border-dashed border-border-subtle bg-surface-muted/50 h-full">
+                <div className="text-center">
+                  <div className="text-6xl mb-4">💬</div>
+                  <h3 className="text-foreground text-lg font-semibold mb-2">Select a conversation</h3>
+                  <p className="text-text-muted text-sm">Choose a conversation from the sidebar to start chatting</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </section>
     </div>
   );

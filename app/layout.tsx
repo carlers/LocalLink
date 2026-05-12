@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Bricolage_Grotesque, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -26,6 +27,19 @@ export const metadata: Metadata = {
   },
 };
 
+const themeScript = `
+(function() {
+  try {
+    var stored = window.localStorage.getItem('theme');
+    var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var theme = stored === 'dark' || stored === 'light' ? stored : prefersDark ? 'dark' : 'light';
+    document.documentElement.classList.add('theme-' + theme);
+  } catch (error) {
+    console.error(error);
+  }
+})();
+`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -37,6 +51,9 @@ export default function RootLayout({
       className={`${bricolage.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="bg-background text-foreground min-h-full">
+        <Script id="theme-init" strategy="beforeInteractive">
+          {themeScript}
+        </Script>
         {children}
       </body>
     </html>

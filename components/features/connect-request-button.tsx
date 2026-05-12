@@ -73,7 +73,7 @@ export function ConnectRequestButton({ receiverOwnerId }: ConnectRequestButtonPr
 
   if (!receiverOwnerId || !currentUserId || currentUserId === receiverOwnerId) {
     return (
-      <button className="rounded-full border border-border-subtle bg-surface-muted px-6 py-2 font-medium text-foreground" type="button" disabled>
+      <button className="btn-secondary" type="button" disabled>
         Connect
       </button>
     );
@@ -81,7 +81,7 @@ export function ConnectRequestButton({ receiverOwnerId }: ConnectRequestButtonPr
 
   if (connectionState === "pending-incoming") {
     return (
-      <Link href="/inbox" className="rounded-full border border-border-subtle bg-surface-muted px-6 py-2 font-medium text-foreground transition hover:bg-surface">
+      <Link href="/inbox" className="btn-secondary">
         Respond in inbox
       </Link>
     );
@@ -90,7 +90,7 @@ export function ConnectRequestButton({ receiverOwnerId }: ConnectRequestButtonPr
   if (connectionState === "pending-outgoing") {
     return (
       <button
-        className="rounded-full border border-border-subtle bg-surface-muted px-6 py-2 font-medium text-foreground transition hover:bg-surface disabled:cursor-not-allowed disabled:opacity-70"
+        className="btn-secondary disabled:cursor-not-allowed disabled:opacity-70"
         type="button"
         disabled={isSubmitting}
         onClick={async () => {
@@ -126,7 +126,7 @@ export function ConnectRequestButton({ receiverOwnerId }: ConnectRequestButtonPr
       return (
         <div className="flex flex-wrap gap-2 sm:flex-nowrap">
           <button
-            className="rounded-full border border-status-error-fg bg-status-error-bg px-6 py-2 font-medium text-status-error-fg transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+            className="btn-primary disabled:cursor-not-allowed disabled:opacity-70"
             type="button"
             disabled={isSubmitting}
             onClick={async () => {
@@ -159,7 +159,7 @@ export function ConnectRequestButton({ receiverOwnerId }: ConnectRequestButtonPr
             {isSubmitting ? "Disconnecting..." : "Confirm disconnect"}
           </button>
           <button
-            className="rounded-full border border-border-subtle bg-surface-muted px-6 py-2 font-medium text-foreground transition hover:bg-surface disabled:cursor-not-allowed disabled:opacity-70"
+            className="btn-secondary disabled:cursor-not-allowed disabled:opacity-70"
             type="button"
             disabled={isSubmitting}
             onClick={() => {
@@ -176,12 +176,12 @@ export function ConnectRequestButton({ receiverOwnerId }: ConnectRequestButtonPr
       <div className="flex flex-wrap gap-2 sm:flex-nowrap">
         <Link
           href={routes.inbox}
-          className="rounded-full border border-brand bg-brand px-6 py-2 font-semibold text-white transition hover:bg-teal-700"
+          className="btn-primary"
         >
           Open inbox
         </Link>
         <button
-          className="rounded-full border border-border-subtle bg-surface-muted px-6 py-2 font-medium text-foreground transition hover:bg-surface"
+          className="btn-secondary"
           type="button"
           onClick={() => {
             setConfirmDisconnect(true);
@@ -195,7 +195,7 @@ export function ConnectRequestButton({ receiverOwnerId }: ConnectRequestButtonPr
 
   return (
     <button
-      className="rounded-full border border-brand bg-brand px-6 py-2 font-semibold text-white transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-70"
+      className="btn-primary disabled:cursor-not-allowed disabled:opacity-70"
       type="button"
       disabled={isSubmitting}
       onClick={async () => {

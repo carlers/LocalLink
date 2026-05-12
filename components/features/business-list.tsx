@@ -99,20 +99,20 @@ export function BusinessList({
               <div className="mt-4 flex flex-wrap gap-2">
                 <Link
                   href={`/business/${business.id}`}
-                  className="rounded-xl bg-brand px-4 py-2 text-xs font-semibold text-white transition hover:bg-brand/90"
+                  className="btn-primary text-xs px-3 py-1.5"
                 >
                   View profile
                 </Link>
                 {connectionStates?.[business.id] === "pending-incoming" ? (
                   <Link
                     href="/inbox"
-                    className="rounded-xl border border-border-subtle bg-surface-muted px-4 py-2 text-xs font-medium text-foreground transition hover:bg-surface"
+                    className="btn-secondary text-xs px-3 py-1.5"
                   >
                     Respond in inbox
                   </Link>
                 ) : (
                   <button
-                    className="rounded-xl border border-border-subtle bg-surface-muted px-4 py-2 text-xs font-medium text-foreground transition hover:bg-surface disabled:cursor-not-allowed disabled:opacity-70 flex items-center justify-center gap-1.5"
+                    className="btn-secondary text-xs px-3 py-1.5 disabled:cursor-not-allowed disabled:opacity-70 flex items-center justify-center gap-1.5"
                     type="button"
                     disabled={!business.ownerId || connectLoadingBusinessId === business.id}
                     onClick={() => {
