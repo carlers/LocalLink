@@ -6,11 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "seed:businesses": "node scripts/seed-businesses.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.104.0",
+    "dotenv": "^17.4.2",
     "leaflet": "^1.9.4",
     "next": "16.2.4",
     "react": "19.2.4",

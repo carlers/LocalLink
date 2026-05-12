@@ -16,26 +16,32 @@ export function MainNav() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
-  const [theme, setTheme] = useState<ThemeMode>("light");
+  const [theme, setTheme] = useState<ThemeMode>(() => {
+    if (typeof window === "undefined") {
+      return "light";
+    }
+
+    const storedTheme = window.localStorage.getItem("theme");
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+    return storedTheme === "dark" || storedTheme === "light"
+      ? storedTheme
+      : prefersDark
+        ? "dark"
+        : "light";
+  });
   const inboxBadgeCount = useInboxBadgeCount(userId);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
 
   useEffect(() => {
-    const storedTheme = window.localStorage.getItem("theme");
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const resolvedTheme: ThemeMode = storedTheme === "dark" || storedTheme === "light"
-      ? storedTheme
-      : prefersDark ? "dark" : "light";
-
-    setTheme(resolvedTheme);
-  }, []);
+    window.localStorage.setItem("theme", theme);
+    document.documentElement.classList.toggle("theme-dark", theme === "dark");
+    document.documentElement.classList.toggle("theme-light", theme === "light");
+  }, [theme]);
 
   const toggleTheme = () => {
     const nextTheme: ThemeMode = theme === "dark" ? "light" : "dark";
-    window.localStorage.setItem("theme", nextTheme);
-    document.documentElement.classList.toggle("theme-dark", nextTheme === "dark");
-    document.documentElement.classList.toggle("theme-light", nextTheme === "light");
     setTheme(nextTheme);
   };
 
