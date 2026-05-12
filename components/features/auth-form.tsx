@@ -280,7 +280,7 @@ export function AuthForm({ mode }: AuthFormProps) {
 
       <button
         type="submit"
-        className="rounded-2xl bg-brand mt-5 w-full px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-brand/20 transition hover:bg-brand/95 disabled:opacity-60 flex items-center justify-center gap-2"
+        className="btn-primary mt-5 w-full px-4 py-3 text-sm flex items-center justify-center gap-2 disabled:opacity-60"
         disabled={isSubmitting}
       >
         {isSubmitting ? (

@@ -154,7 +154,7 @@ const MapContainerInner = dynamic(
                       </p>
                       <button
                         type="button"
-                        className="mt-2 w-full rounded-chip bg-brand px-3 py-1 text-xs font-semibold text-white transition hover:bg-teal-700"
+                        className="btn-primary mt-2 w-full text-xs px-3 py-1"
                         onClick={() => {
                           router.push(`/business/${business.id}`);
                           if (onBusinessSelect) {

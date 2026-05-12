@@ -152,7 +152,7 @@ export default async function BusinessProfilePage({ params }: PageProps) {
             </div>
             <div className="flex flex-wrap gap-2 sm:flex-nowrap">
               <ConnectRequestButton receiverOwnerId={business.ownerId ?? null} />
-              <button className="rounded-full border border-border-subtle bg-surface-muted px-6 py-2 font-medium text-foreground transition hover:bg-surface" type="button">
+              <button className="btn-secondary" type="button">
                 Message
               </button>
             </div>

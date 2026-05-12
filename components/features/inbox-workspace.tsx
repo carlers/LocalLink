@@ -492,7 +492,7 @@ export function InboxWorkspace({ initialConversationId = null }: InboxWorkspaceP
   };
 
   return (
-    <div className="flex h-[calc(100dvh-8rem)] min-h-0 flex-col gap-4 overflow-hidden">
+    <div className="flex min-h-[70vh] flex-col gap-4 overflow-hidden">
       {error ? <div className="rounded-panel border border-status-error-fg bg-status-error-bg p-4 text-sm text-status-error-fg">{error}</div> : null}
 
       <InboxColumns
