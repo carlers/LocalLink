@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Spinner } from "@/components/ui/spinner";
 import type { InventoryItem } from "@/lib/types/profile";
 
 type InventoryEditorProps = {
@@ -138,9 +139,15 @@ export function InventoryEditor({ items, onItemsChange, isLoading = false }: Inv
           type="button"
           disabled={isLoading || !newItemName.trim() || !newItemQuantity.trim()}
           onClick={handleAddItem}
-          className="mt-4 rounded-chip bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-700 disabled:opacity-50"
+          className="mt-4 rounded-chip bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-700 disabled:opacity-50 flex items-center justify-center gap-2"
         >
-          Add item
+          {isLoading ? (
+            <>
+              <Spinner size="sm" color="white" ariaLabel="Adding item" />
+            </>
+          ) : (
+            "Add item"
+          )}
         </button>
       </div>
     </div>

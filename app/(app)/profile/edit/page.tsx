@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { InventoryEditor } from "@/components/features/inventory-editor";
 import { SectionCard } from "@/components/ui/section-card";
+import { Spinner } from "@/components/ui/spinner";
 import type { BusinessCategory } from "@/lib/types/business";
 import type { InventoryItem } from "@/lib/types/profile";
 
@@ -829,9 +830,16 @@ export default function EditProfilePage() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="rounded-chip bg-brand px-6 py-2 text-sm font-semibold text-white transition hover:bg-teal-700 disabled:opacity-50"
+            className="rounded-chip bg-brand px-6 py-2 text-sm font-semibold text-white transition hover:bg-teal-700 disabled:opacity-50 flex items-center justify-center gap-2"
           >
-            {isSubmitting ? "Saving..." : "Save changes"}
+            {isSubmitting ? (
+              <>
+                <Spinner size="sm" color="white" ariaLabel="Saving profile" />
+                <span>Saving...</span>
+              </>
+            ) : (
+              "Save changes"
+            )}
           </button>
           <Link
             href="/profile"

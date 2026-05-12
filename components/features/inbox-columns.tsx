@@ -1,5 +1,6 @@
 import { ConversationPane } from "@/components/features/conversation-pane";
 import { ConversationList } from "@/components/features/conversation-list";
+import { Spinner } from "@/components/ui/spinner";
 import type { Conversation, Notification } from "@/lib/types/message";
 
 type PendingConnectionRequest = {
@@ -66,7 +67,7 @@ export function InboxColumns({
                     ) : null}
                     <button
                       type="button"
-                      className="rounded-full border border-brand bg-brand px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-70"
+                      className="rounded-full border border-brand bg-brand px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-70 flex items-center justify-center gap-1"
                       disabled={actionLoadingRequestId === request.id}
                       onClick={() => {
                         if (!onAcceptRequest) {
@@ -76,7 +77,11 @@ export function InboxColumns({
                         void onAcceptRequest(request.id);
                       }}
                     >
-                      {actionLoadingRequestId === request.id ? "Processing..." : "Accept"}
+                      {actionLoadingRequestId === request.id ? (
+                        <Spinner size="sm" color="white" ariaLabel="Processing request" />
+                      ) : (
+                        "Accept"
+                      )}
                     </button>
                     <button
                       type="button"
@@ -126,25 +131,33 @@ export function InboxColumns({
                     {onMarkNotificationRead && !notification.isRead ? (
                       <button
                         type="button"
-                        className="text-brand rounded-full border border-brand/30 px-3 py-1 text-xs font-medium transition hover:bg-brand/10 disabled:cursor-not-allowed disabled:opacity-70"
+                        className="text-brand rounded-full border border-brand/30 px-3 py-1 text-xs font-medium transition hover:bg-brand/10 disabled:cursor-not-allowed disabled:opacity-70 flex items-center justify-center gap-1"
                         disabled={notificationActionLoadingId === notification.id}
                         onClick={() => {
                           void onMarkNotificationRead(notification.id);
                         }}
                       >
-                        {notificationActionLoadingId === notification.id ? 'Updating...' : 'Mark read'}
+                        {notificationActionLoadingId === notification.id ? (
+                          <Spinner size="sm" color="brand" ariaLabel="Updating notification" />
+                        ) : (
+                          'Mark read'
+                        )}
                       </button>
                     ) : null}
                     {onDismissNotification ? (
                       <button
                         type="button"
-                        className="rounded-full border border-border-subtle px-3 py-1 text-xs font-medium text-foreground transition hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-70"
+                        className="rounded-full border border-border-subtle px-3 py-1 text-xs font-medium text-foreground transition hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-70 flex items-center justify-center gap-1"
                         disabled={notificationActionLoadingId === notification.id}
                         onClick={() => {
                           void onDismissNotification(notification.id);
                         }}
                       >
-                        {notificationActionLoadingId === notification.id ? 'Updating...' : 'Dismiss'}
+                        {notificationActionLoadingId === notification.id ? (
+                          <Spinner size="sm" color="muted" ariaLabel="Dismissing notification" />
+                        ) : (
+                          'Dismiss'
+                        )}
                       </button>
                     ) : null}
                   </div>

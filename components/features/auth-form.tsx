@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { routes } from "@/lib/constants/routes";
+import { Spinner } from "@/components/ui/spinner";
 import type { BusinessCategory } from "@/lib/types/business";
 import { getCities, getBarangaysForCity } from "@/lib/constants/locations";
 
@@ -279,10 +280,19 @@ export function AuthForm({ mode }: AuthFormProps) {
 
       <button
         type="submit"
-        className="rounded-2xl bg-brand mt-5 w-full px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-brand/20 transition hover:bg-brand/95 disabled:opacity-60"
+        className="rounded-2xl bg-brand mt-5 w-full px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-brand/20 transition hover:bg-brand/95 disabled:opacity-60 flex items-center justify-center gap-2"
         disabled={isSubmitting}
       >
-        {isSubmitting ? "Please wait..." : isSignup ? "Sign Up" : "Log In"}
+        {isSubmitting ? (
+          <>
+            <Spinner size="sm" color="white" ariaLabel="Submitting form" />
+            <span>Please wait...</span>
+          </>
+        ) : isSignup ? (
+          "Sign Up"
+        ) : (
+          "Log In"
+        )}
       </button>
     </form>
   );
