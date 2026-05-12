@@ -146,7 +146,7 @@ const MapContainerInner = dynamic(
                           />
                         </div>
                       ) : null}
-                      <p className="font-semibold text-foreground">{business.name}</p>
+                      <p className="font-semibold text-brand">{business.name}</p>
                       <p className="text-sm text-text-muted">{formatLocation(business)}</p>
                       <p className="text-sm text-text-muted">{business.category}</p>
                       <p className="line-clamp-3 text-sm text-text-muted">
