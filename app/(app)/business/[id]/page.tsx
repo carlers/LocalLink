@@ -4,6 +4,8 @@ import { ConnectRequestButton } from "@/components/features/connect-request-butt
 import { BusinessMap } from "@/components/features/business-map";
 import { InventoryDisplay } from "@/components/features/inventory-display";
 import { SectionCard } from "@/components/ui/section-card";
+import { getServerLocale } from "@/lib/i18n/server-locale";
+import { translations } from "@/lib/i18n/translations";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { Business } from "@/lib/types/business";
 import type { InventoryItem } from "@/lib/types/profile";
@@ -37,6 +39,8 @@ type PageProps = {
 
 export default async function BusinessProfilePage({ params }: PageProps) {
   const { id } = await params;
+  const locale = await getServerLocale();
+  const copy = translations[locale].businessProfile;
   let business: Business | null = null;
   let connectionCount = 0;
   let inventory: InventoryItem[] = [];
@@ -107,11 +111,11 @@ export default async function BusinessProfilePage({ params }: PageProps) {
     return (
       <div className="space-y-4">
         <Link href="/discover" className="text-brand hover:underline">
-          ← Back to discover
+          ← {copy.backToDiscover}
         </Link>
         <div className="rounded-panel border-border-subtle bg-surface border p-6">
-          <h1 className="text-2xl font-semibold">Business not found</h1>
-          <p className="text-text-muted mt-2">The business you&apos;re looking for doesn&apos;t exist or has been removed.</p>
+          <h1 className="text-2xl font-semibold">{copy.businessNotFound}</h1>
+          <p className="text-text-muted mt-2">{copy.businessMissingHint}</p>
         </div>
       </div>
     );
@@ -120,7 +124,7 @@ export default async function BusinessProfilePage({ params }: PageProps) {
   return (
     <div className="space-y-6">
       <Link href="/discover" className="text-brand hover:underline">
-        ← Back to discover
+        ← {copy.backToDiscover}
       </Link>
 
       <section className="rounded-panel border-border-subtle bg-surface border p-6 shadow-sm shadow-surface-muted/40">
@@ -137,7 +141,7 @@ export default async function BusinessProfilePage({ params }: PageProps) {
             ) : (
               <div className="flex h-full w-full items-end bg-gradient-to-br from-brand/20 via-surface-muted to-surface-muted p-5">
                 <span className="text-xs font-semibold uppercase tracking-[0.24em] text-text-muted">
-                  No business photo yet
+                  {copy.noBusinessPhoto}
                 </span>
               </div>
             )}
@@ -153,7 +157,7 @@ export default async function BusinessProfilePage({ params }: PageProps) {
             <div className="flex flex-wrap gap-2 sm:flex-nowrap">
               <ConnectRequestButton receiverOwnerId={business.ownerId ?? null} />
               <button className="btn-secondary" type="button">
-                Message
+                {copy.message}
               </button>
             </div>
           </div>
@@ -161,53 +165,53 @@ export default async function BusinessProfilePage({ params }: PageProps) {
       </section>
 
       <SectionCard
-        title="Business Details"
-        description="Credentials and trading preferences"
+        title={copy.businessDetails}
+        description={copy.credentialsAndPreferences}
       >
         <div className="grid gap-4 sm:grid-cols-4">
           <div className="rounded-chip bg-surface-muted p-4 text-sm">
-            <p className="font-semibold text-foreground">DTI Registration</p>
+            <p className="font-semibold text-foreground">{copy.dtiRegistration}</p>
             <p className="text-text-muted mt-1">
-              {business.isDtiRegistered ? "✓ Registered" : "Not registered"}
+              {business.isDtiRegistered ? `✓ ${copy.registered}` : copy.notRegistered}
             </p>
           </div>
           <div className="rounded-chip bg-surface-muted p-4 text-sm">
-            <p className="font-semibold text-foreground">Barter Friendly</p>
+            <p className="font-semibold text-foreground">{copy.barterFriendly}</p>
             <p className="text-text-muted mt-1">
-              {business.isBarterFriendly ? "✓ Yes" : "No"}
+              {business.isBarterFriendly ? `✓ ${copy.yes}` : copy.no}
             </p>
           </div>
           <div className="rounded-chip bg-surface-muted p-4 text-sm">
-            <p className="font-semibold text-foreground">Urgent Need</p>
+            <p className="font-semibold text-foreground">{copy.urgentNeed}</p>
             <p className="text-text-muted mt-1">
-              {business.hasUrgentNeed ? "✓ Yes" : "No"}
+              {business.hasUrgentNeed ? `✓ ${copy.yes}` : copy.no}
             </p>
           </div>
           <div className="rounded-chip bg-surface-muted p-4 text-sm">
-            <p className="font-semibold text-foreground">Connections</p>
+            <p className="font-semibold text-foreground">{copy.connections}</p>
             <p className="text-text-muted mt-1">{connectionCount}</p>
           </div>
         </div>
       </SectionCard>
 
       <SectionCard
-        title="Inventory Snapshot"
-        description="What this business has available for trade and what it is looking for."
+        title={copy.inventorySnapshot}
+        description={copy.inventoryDescription}
       >
-        <InventoryDisplay items={inventory} />
+        <InventoryDisplay items={inventory} copy={translations[locale].inventoryDisplay} />
       </SectionCard>
 
       <SectionCard
-        title="About This Business"
-        description="Category and location information"
+        title={copy.aboutBusiness}
+        description={copy.categoryAndLocation}
       >
         <div className="space-y-4">
           <div>
-            <p className="text-sm font-semibold text-text-muted">CATEGORY</p>
+            <p className="text-sm font-semibold text-text-muted">{copy.category}</p>
             <p className="mt-1 text-foreground">{business.category}</p>
           </div>
           <div>
-            <p className="text-sm font-semibold text-text-muted">LOCATION</p>
+            <p className="text-sm font-semibold text-text-muted">{copy.location}</p>
             <p className="mt-1 text-foreground">
               {business.barangay && business.city ? `${business.barangay}, ${business.city}` : business.location}
             </p>
@@ -216,8 +220,8 @@ export default async function BusinessProfilePage({ params }: PageProps) {
       </SectionCard>
 
       <SectionCard
-        title="Business Map"
-        description="Approximate pin for this business and its barangay context"
+        title={copy.businessMap}
+        description={copy.businessMapDescription}
       >
         <BusinessMap businesses={[business]} centerLocation={business.city ?? business.location} />
       </SectionCard>

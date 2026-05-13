@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Spinner } from "@/components/ui/spinner";
+import { useLocale } from "@/lib/hooks/useLocale";
+import { translations } from "@/lib/i18n/translations";
 import type { InventoryItem } from "@/lib/types/profile";
 
 type InventoryEditorProps = {
@@ -9,6 +11,8 @@ type InventoryEditorProps = {
 };
 
 export function InventoryEditor({ items, onItemsChange, isLoading = false }: InventoryEditorProps) {
+  const { locale } = useLocale();
+  const copy = translations[locale].inventoryEditor;
   const [newItemName, setNewItemName] = useState("");
   const [newItemQuantity, setNewItemQuantity] = useState("");
   const [newItemKind, setNewItemKind] = useState<InventoryItem["kind"]>("available");
@@ -47,7 +51,7 @@ export function InventoryEditor({ items, onItemsChange, isLoading = false }: Inv
     <div className="space-y-6">
       <div className="space-y-4">
         {items.length === 0 ? (
-          <p className="text-sm text-text-muted">No inventory items yet. Add items to share your stock and needs.</p>
+          <p className="text-sm text-text-muted">{copy.emptyInventory}</p>
         ) : (
           <div className="space-y-4">
             {items.map((item) => (
@@ -55,7 +59,7 @@ export function InventoryEditor({ items, onItemsChange, isLoading = false }: Inv
                 <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
                   <div className="space-y-3">
                     <div>
-                      <label className="text-sm font-medium">Item</label>
+                      <label className="text-sm font-medium">{copy.item}</label>
                       <input
                         type="text"
                         className="rounded-chip border-border-subtle mt-1 w-full border px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
@@ -64,7 +68,7 @@ export function InventoryEditor({ items, onItemsChange, isLoading = false }: Inv
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium">Quantity / Notes</label>
+                      <label className="text-sm font-medium">{copy.quantityNotes}</label>
                       <input
                         type="text"
                         className="rounded-chip border-border-subtle mt-1 w-full border px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
@@ -73,14 +77,14 @@ export function InventoryEditor({ items, onItemsChange, isLoading = false }: Inv
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium">Type</label>
+                      <label className="text-sm font-medium">{copy.type}</label>
                       <select
                         className="rounded-chip border-border-subtle mt-1 w-full border px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
                         value={item.kind}
                         onChange={(event) => handleUpdateItem(item.id, "kind", event.target.value)}
                       >
-                        <option value="available">Available</option>
-                        <option value="needed">Needed</option>
+                        <option value="available">{copy.available}</option>
+                        <option value="needed">{copy.needed}</option>
                       </select>
                     </div>
                   </div>
@@ -90,7 +94,7 @@ export function InventoryEditor({ items, onItemsChange, isLoading = false }: Inv
                       className="rounded-chip border border-red-600 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-100"
                       onClick={() => handleRemoveItem(item.id)}
                     >
-                      Remove
+                      {copy.remove}
                     </button>
                   </div>
                 </div>
@@ -101,37 +105,37 @@ export function InventoryEditor({ items, onItemsChange, isLoading = false }: Inv
       </div>
 
       <div className="rounded-panel border-border-subtle bg-surface border p-4">
-        <p className="text-sm font-semibold text-foreground">Add inventory item</p>
+        <p className="text-sm font-semibold text-foreground">{copy.addInventoryItem}</p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <div>
-            <label className="text-sm font-medium">Item</label>
+            <label className="text-sm font-medium">{copy.item}</label>
             <input
               type="text"
               className="rounded-chip border-border-subtle mt-1 w-full border px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
               value={newItemName}
               onChange={(event) => setNewItemName(event.target.value)}
-              placeholder="Rice, milk, packaging"
+              placeholder={copy.itemPlaceholder}
             />
           </div>
           <div>
-            <label className="text-sm font-medium">Quantity / Notes</label>
+            <label className="text-sm font-medium">{copy.quantityNotes}</label>
             <input
               type="text"
               className="rounded-chip border-border-subtle mt-1 w-full border px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
               value={newItemQuantity}
               onChange={(event) => setNewItemQuantity(event.target.value)}
-              placeholder="5 sacks, 10 liters"
+              placeholder={copy.quantityPlaceholder}
             />
           </div>
           <div className="sm:col-span-2">
-            <label className="text-sm font-medium">Type</label>
+            <label className="text-sm font-medium">{copy.type}</label>
             <select
               className="rounded-chip border-border-subtle mt-1 w-full border px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
               value={newItemKind}
               onChange={(event) => setNewItemKind(event.target.value as InventoryItem["kind"])}
             >
-              <option value="available">Available</option>
-              <option value="needed">Needed</option>
+              <option value="available">{copy.available}</option>
+              <option value="needed">{copy.needed}</option>
             </select>
           </div>
         </div>
@@ -143,10 +147,10 @@ export function InventoryEditor({ items, onItemsChange, isLoading = false }: Inv
         >
           {isLoading ? (
             <>
-              <Spinner size="sm" color="white" ariaLabel="Adding item" />
+              <Spinner size="sm" color="white" ariaLabel={copy.addingItem} />
             </>
           ) : (
-            "Add item"
+            copy.addItem
           )}
         </button>
       </div>

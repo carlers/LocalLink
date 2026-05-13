@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { BusinessList } from "@/components/features/business-list";
 import { BusinessMap } from "@/components/features/business-map";
 import { DiscoverSearch } from "@/components/features/discover-search";
 import { SectionCard } from "@/components/ui/section-card";
+import { useLocale } from "@/lib/hooks/useLocale";
+import { translations } from "@/lib/i18n/translations";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { Business } from "@/lib/types/business";
 import type { BusinessConnectionState } from "@/lib/types/connection";
@@ -16,11 +18,20 @@ type ConnectionRequestRow = {
   status: "pending" | "accepted";
 };
 
+type ResultSummaryState =
+  | { kind: "prompt" }
+  | { kind: "searching" }
+  | { kind: "results"; count: number }
+  | { kind: "no-results" }
+  | { kind: "unable" };
+
 export default function DiscoverPage() {
+  const { locale } = useLocale();
+  const copy = translations[locale].discoverPage;
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [resultSummary, setResultSummary] = useState("Search businesses by name, category, or location.");
+  const [resultSummaryState, setResultSummaryState] = useState<ResultSummaryState>({ kind: "prompt" });
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [connectionStates, setConnectionStates] = useState<Record<string, BusinessConnectionState>>({});
   const [connectLoadingBusinessId, setConnectLoadingBusinessId] = useState<string | null>(null);
@@ -29,7 +40,24 @@ export default function DiscoverPage() {
   const [selectedCity, setSelectedCity] = useState<string>("");
   const [selectedBarangay, setSelectedBarangay] = useState<string>("");
 
-  const hydrateConnectionStates = async (
+  const resultSummary = useMemo(() => {
+    switch (resultSummaryState.kind) {
+      case "prompt":
+        return copy.searchPrompt;
+      case "searching":
+        return copy.searching;
+      case "results":
+        return `${resultSummaryState.count} ${resultSummaryState.count === 1 ? copy.resultSingular : copy.resultPlural}`;
+      case "no-results":
+        return copy.noBusinessesForFilters;
+      case "unable":
+        return copy.unableToLoad;
+      default:
+        return copy.searchPrompt;
+    }
+  }, [copy, resultSummaryState]);
+
+  const hydrateConnectionStates = useCallback(async (
     userId: string,
     nextBusinesses: Business[],
   ) => {
@@ -97,9 +125,9 @@ export default function DiscoverPage() {
     }
 
     setConnectionStates(nextStates);
-  };
+  }, []);
 
-  const fetchBusinesses = async (
+  const fetchBusinesses = useCallback(async (
     searchQuery: string,
     category: string,
     city: string,
@@ -107,7 +135,7 @@ export default function DiscoverPage() {
   ) => {
     setIsLoading(true);
     setError(null);
-    setResultSummary("Searching businesses...");
+    setResultSummaryState({ kind: "searching" });
 
     if (barangay && city) {
       setUserLocation(`${barangay}, ${city}`);
@@ -185,21 +213,21 @@ export default function DiscoverPage() {
       } else {
         setConnectionStates({});
       }
-      setResultSummary(
+      setResultSummaryState(
         formattedBusinesses.length > 0
-          ? `${formattedBusinesses.length} result${formattedBusinesses.length === 1 ? "" : "s"} found`
-          : "No businesses found for these filters.",
+          ? { kind: "results", count: formattedBusinesses.length }
+          : { kind: "no-results" },
       );
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to fetch businesses.";
       setError(message);
       setBusinesses([]);
       setConnectionStates({});
-      setResultSummary("Unable to load businesses right now.");
+      setResultSummaryState({ kind: "unable" });
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [hydrateConnectionStates]);
 
   const handleConnect = async (
     business: Business,
@@ -286,17 +314,17 @@ export default function DiscoverPage() {
     };
 
     void loadBusinesses();
-  }, []);
+  }, [fetchBusinesses]);
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">Discover Businesses</h1>
+      <h1 className="text-2xl font-semibold">{copy.title}</h1>
 
-      <SectionCard title="Search And Filters" description={resultSummary}>
+      <SectionCard title={copy.searchAndFilters} description={resultSummary}>
         <DiscoverSearch onFilter={fetchBusinesses} isLoading={isLoading} />
       </SectionCard>
 
-      <SectionCard title="Business Matches" description="Matched business profiles from your search criteria.">
+      <SectionCard title={copy.businessMatches} description={copy.matchedProfilesDescription}>
         <div className="space-y-4">
           {!isLoading && businesses.length > 0 && (
             <div className="flex gap-2 border-border-subtle border-b pb-4">
@@ -308,7 +336,7 @@ export default function DiscoverPage() {
                   : "border-border-subtle border bg-surface text-foreground hover:bg-surface-muted"
                   }`}
               >
-                List view
+                {copy.listView}
               </button>
               <button
                 type="button"
@@ -318,7 +346,7 @@ export default function DiscoverPage() {
                   : "border-border-subtle border bg-surface text-foreground hover:bg-surface-muted"
                   }`}
               >
-                Map view
+                {copy.mapView}
               </button>
             </div>
           )}
@@ -331,13 +359,13 @@ export default function DiscoverPage() {
 
           {isLoading && (
             <div className="rounded-panel border-border-subtle bg-surface-muted border p-4 text-sm text-text-muted">
-              Loading businesses...
+              {copy.loadingBusinesses}
             </div>
           )}
 
           {!isLoading && businesses.length === 0 && !error && (
             <div className="rounded-panel border-border-subtle bg-surface-muted border p-4 text-sm text-text-muted">
-              No businesses are available right now. Try broadening your search or check back later.
+              {copy.noBusinessesAvailable}
             </div>
           )}
 

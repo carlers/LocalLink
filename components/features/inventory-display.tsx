@@ -1,14 +1,26 @@
 import type { InventoryItem } from "@/lib/types/profile";
+import { translations } from "@/lib/i18n/translations";
+
+type InventoryDisplayCopy = {
+  empty: string;
+  availableForTrade: string;
+  noAvailableItems: string;
+  lookingFor: string;
+  noNeededItems: string;
+};
 
 type InventoryDisplayProps = {
   items: InventoryItem[];
+  copy?: InventoryDisplayCopy;
 };
 
-export function InventoryDisplay({ items }: InventoryDisplayProps) {
+const defaultCopy = translations.en.inventoryDisplay;
+
+export function InventoryDisplay({ items, copy = defaultCopy }: InventoryDisplayProps) {
   if (items.length === 0) {
     return (
       <div className="rounded-panel border-border-subtle bg-surface-muted border p-4 text-sm text-text-muted">
-        No inventory items listed yet.
+        {copy.empty}
       </div>
     );
   }
@@ -19,9 +31,9 @@ export function InventoryDisplay({ items }: InventoryDisplayProps) {
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       <div className="rounded-panel border-border-subtle bg-surface-muted border p-4">
-        <h4 className="text-sm font-semibold text-foreground">Available for trade</h4>
+        <h4 className="text-sm font-semibold text-foreground">{copy.availableForTrade}</h4>
         {availableItems.length === 0 ? (
-          <p className="mt-3 text-sm text-text-muted">No available items listed.</p>
+          <p className="mt-3 text-sm text-text-muted">{copy.noAvailableItems}</p>
         ) : (
           <ul className="mt-3 space-y-3">
             {availableItems.map((item) => (
@@ -35,9 +47,9 @@ export function InventoryDisplay({ items }: InventoryDisplayProps) {
       </div>
 
       <div className="rounded-panel border-border-subtle bg-surface-muted border p-4">
-        <h4 className="text-sm font-semibold text-foreground">Looking for</h4>
+        <h4 className="text-sm font-semibold text-foreground">{copy.lookingFor}</h4>
         {neededItems.length === 0 ? (
-          <p className="mt-3 text-sm text-text-muted">No needed items listed.</p>
+          <p className="mt-3 text-sm text-text-muted">{copy.noNeededItems}</p>
         ) : (
           <ul className="mt-3 space-y-3">
             {neededItems.map((item) => (

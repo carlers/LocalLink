@@ -1,6 +1,10 @@
+"use client";
+
 import { ConversationPane } from "@/components/features/conversation-pane";
 import { ConversationList } from "@/components/features/conversation-list";
 import { Spinner } from "@/components/ui/spinner";
+import { useLocale } from "@/lib/hooks/useLocale";
+import { translations } from "@/lib/i18n/translations";
 import type { Conversation, Notification } from "@/lib/types/message";
 
 type PendingConnectionRequest = {
@@ -41,28 +45,31 @@ export function InboxColumns({
   onSelectConversation,
   onBackToInbox,
 }: InboxColumnsProps) {
+  const { locale } = useLocale();
+  const copy = translations[locale].inbox;
+
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden sm:gap-3 lg:gap-4">
       {/* Top band: requests and notifications - more compact on mobile */}
       <div className="grid gap-2 sm:gap-3 lg:grid-cols-2">
         <section className="rounded-panel border-border-subtle bg-surface border p-2.5 sm:p-3 lg:p-3.5">
-          <h2 className="text-foreground text-base font-semibold">Connection Requests</h2>
+          <h2 className="text-foreground text-base font-semibold">{copy.connectionRequests}</h2>
           {connectionRequests.length === 0 ? (
-            <p className="text-text-muted mt-2 text-sm">No pending connection requests.</p>
+            <p className="text-text-muted mt-2 text-sm">{copy.noPendingConnectionRequests}</p>
           ) : (
             <ul className="mt-2 space-y-2">
               {connectionRequests.map((request) => (
                 <li key={request.id} className="rounded-chip bg-surface-muted p-2.5">
                   <p className="text-sm font-medium">{request.businessName}</p>
-                  <p className="text-text-muted text-sm">Owner: {request.ownerName}</p>
-                  <p className="text-text-muted text-sm">Location: {request.location}</p>
+                  <p className="text-text-muted text-sm">{copy.owner}: {request.ownerName}</p>
+                  <p className="text-text-muted text-sm">{copy.location}: {request.location}</p>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {request.businessId ? (
                       <a
                         href={`/business/${request.businessId}`}
                         className="btn-secondary text-xs px-3 py-1.5"
                       >
-                        View profile
+                        {copy.viewProfile}
                       </a>
                     ) : null}
                     <button
@@ -78,9 +85,9 @@ export function InboxColumns({
                       }}
                     >
                       {actionLoadingRequestId === request.id ? (
-                        <Spinner size="sm" color="white" ariaLabel="Processing request" />
+                        <Spinner size="sm" color="white" ariaLabel={copy.processingRequest} />
                       ) : (
-                        "Accept"
+                        copy.accept
                       )}
                     </button>
                     <button
@@ -95,7 +102,7 @@ export function InboxColumns({
                         void onRejectRequest(request.id);
                       }}
                     >
-                      Decline
+                      {copy.decline}
                     </button>
                   </div>
                 </li>
@@ -105,9 +112,9 @@ export function InboxColumns({
         </section>
 
         <section className="rounded-panel border-border-subtle bg-surface border p-2.5 sm:p-3 lg:p-3.5">
-          <h2 className="text-foreground text-base font-semibold">Notifications</h2>
+          <h2 className="text-foreground text-base font-semibold">{copy.notifications}</h2>
           {notifications.length === 0 ? (
-            <p className="text-text-muted mt-2 text-sm">No notifications yet.</p>
+            <p className="text-text-muted mt-2 text-sm">{copy.noNotificationsYet}</p>
           ) : (
             <ul className="mt-2 space-y-2">
               {notifications.map((notification) => (
@@ -125,7 +132,7 @@ export function InboxColumns({
                   <div className="mt-2 flex flex-wrap items-center gap-2">
                     {!notification.isRead ? (
                       <span className="text-brand inline-flex rounded-full bg-brand/10 px-2 py-1 text-xs font-medium">
-                        Unread
+                        {copy.unread}
                       </span>
                     ) : null}
                     {onMarkNotificationRead && !notification.isRead ? (
@@ -138,9 +145,9 @@ export function InboxColumns({
                         }}
                       >
                         {notificationActionLoadingId === notification.id ? (
-                          <Spinner size="sm" color="brand" ariaLabel="Updating notification" />
+                          <Spinner size="sm" color="brand" ariaLabel={copy.updatingNotification} />
                         ) : (
-                          'Mark read'
+                          copy.markRead
                         )}
                       </button>
                     ) : null}
@@ -154,9 +161,9 @@ export function InboxColumns({
                         }}
                       >
                         {notificationActionLoadingId === notification.id ? (
-                          <Spinner size="sm" color="muted" ariaLabel="Dismissing notification" />
+                          <Spinner size="sm" color="muted" ariaLabel={copy.dismissingNotification} />
                         ) : (
-                          'Dismiss'
+                          copy.dismiss
                         )}
                       </button>
                     ) : null}
@@ -173,7 +180,7 @@ export function InboxColumns({
         <div className="flex min-h-0 flex-1 gap-4 xl:grid xl:grid-cols-[300px_minmax(0,1fr)]">
           {/* Conversation sidebar: always visible on desktop */}
           <div className="rounded-panel border-border-subtle bg-surface-muted flex-col border p-3 sm:p-3.5 xl:flex xl:p-4 min-h-0 flex-1 max-h-full">
-            <h2 className="text-foreground text-lg font-semibold mb-3">Conversations</h2>
+            <h2 className="text-foreground text-lg font-semibold mb-3">{copy.conversations}</h2>
             <div className="min-h-0 flex-1 overflow-y-auto pr-1">
               <ConversationList
                 conversations={conversations}
@@ -193,8 +200,8 @@ export function InboxColumns({
               <div className="flex min-h-0 flex-1 items-center justify-center rounded-panel border-2 border-dashed border-border-subtle bg-surface-muted/50 h-full">
                 <div className="text-center">
                   <div className="text-6xl mb-4">💬</div>
-                  <h3 className="text-foreground text-lg font-semibold mb-2">Select a conversation</h3>
-                  <p className="text-text-muted text-sm">Choose a conversation from the sidebar to start chatting</p>
+                  <h3 className="text-foreground text-lg font-semibold mb-2">{copy.selectConversation}</h3>
+                  <p className="text-text-muted text-sm">{copy.chooseConversationHint}</p>
                 </div>
               </div>
             )}

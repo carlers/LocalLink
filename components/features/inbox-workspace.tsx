@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { InboxColumns } from '@/components/features/inbox-columns';
+import { useLocale } from '@/lib/hooks/useLocale';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { useRealtimeConversations } from '@/lib/hooks/useRealtimeConversations';
 import { useRealtimeNotifications } from '@/lib/hooks/useRealtimeNotifications';
@@ -66,14 +67,14 @@ type InboxWorkspaceProps = {
   initialConversationId?: string | null;
 };
 
-const formatTimestamp = (value: string) => {
+const formatTimestamp = (value: string, locale: string) => {
   const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
     return value;
   }
 
-  return new Intl.DateTimeFormat('en-PH', {
+  return new Intl.DateTimeFormat(locale === 'tl' ? 'fil-PH' : 'en-PH', {
     month: 'short',
     day: 'numeric',
     hour: 'numeric',
@@ -82,6 +83,7 @@ const formatTimestamp = (value: string) => {
 };
 
 export function InboxWorkspace({ initialConversationId = null }: InboxWorkspaceProps) {
+  const { locale } = useLocale();
   const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -206,9 +208,9 @@ export function InboxWorkspace({ initialConversationId = null }: InboxWorkspaceP
           id: row.id,
           requesterId: row.requester_id,
           businessId: business?.id ?? null,
-          ownerName: profile?.owner_name ?? 'Business owner',
-          businessName: business?.name ?? profile?.business_name ?? 'Local business',
-          location: business?.location ?? profile?.location ?? 'Unknown area',
+          ownerName: profile?.owner_name ?? (locale === 'tl' ? 'May-ari ng negosyo' : 'Business owner'),
+          businessName: business?.name ?? profile?.business_name ?? (locale === 'tl' ? 'Lokal na negosyo' : 'Local business'),
+          location: business?.location ?? profile?.location ?? (locale === 'tl' ? 'Hindi kilalang lugar' : 'Unknown area'),
         };
       }),
     );
@@ -218,7 +220,7 @@ export function InboxWorkspace({ initialConversationId = null }: InboxWorkspaceP
         id: notification.id,
         title: notification.title,
         detail: notification.detail,
-        createdAt: formatTimestamp(notification.created_at),
+        createdAt: formatTimestamp(notification.created_at, locale),
         isRead: notification.is_read,
       })),
     );
@@ -250,13 +252,13 @@ export function InboxWorkspace({ initialConversationId = null }: InboxWorkspaceP
       conversationRows.map((conversation) => ({
         id: conversation.id,
         partnerName: conversation.partner_name,
-        lastMessagePreview: conversation.last_message_preview ?? 'No messages yet.',
-        lastMessageAt: conversation.last_message_at ? formatTimestamp(conversation.last_message_at) : null,
+        lastMessagePreview: conversation.last_message_preview ?? (locale === 'tl' ? 'Wala pang mensahe.' : 'No messages yet.'),
+        lastMessageAt: conversation.last_message_at ? formatTimestamp(conversation.last_message_at, locale) : null,
         unreadCount: unreadCounts.get(conversation.id) ?? 0,
       })),
     );
 
-  }, []);
+  }, [locale]);
 
   const getUserSummary = async (supabase: ReturnType<typeof createSupabaseBrowserClient>, currentUserId: string) => {
     const [profileResult, businessResult] = await Promise.all([
@@ -273,8 +275,8 @@ export function InboxWorkspace({ initialConversationId = null }: InboxWorkspaceP
     }
 
     return {
-      ownerName: profileResult.data?.owner_name ?? 'Business owner',
-      businessName: businessResult.data?.name ?? profileResult.data?.business_name ?? 'Local business',
+      ownerName: profileResult.data?.owner_name ?? (locale === 'tl' ? 'May-ari ng negosyo' : 'Business owner'),
+      businessName: businessResult.data?.name ?? profileResult.data?.business_name ?? (locale === 'tl' ? 'Lokal na negosyo' : 'Local business'),
     };
   };
 

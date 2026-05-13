@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { useLocale } from "@/lib/hooks/useLocale";
+import { translations } from "@/lib/i18n/translations";
 import { InventoryEditor } from "@/components/features/inventory-editor";
 import { SectionCard } from "@/components/ui/section-card";
 import { Spinner } from "@/components/ui/spinner";
@@ -24,6 +26,8 @@ type FormState = {
 
 export default function EditProfilePage() {
   const router = useRouter();
+  const { locale } = useLocale();
+  const copy = translations[locale].profileEdit;
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -155,7 +159,7 @@ export default function EditProfilePage() {
         }
       } catch (err) {
         setError(
-          err instanceof Error ? err.message : "Failed to load profile."
+          err instanceof Error ? err.message : copy.failedLoad
         );
       } finally {
         setIsLoading(false);
@@ -163,7 +167,7 @@ export default function EditProfilePage() {
     };
 
     void loadProfile();
-  }, [router]);
+  }, [copy.failedLoad, router]);
 
   // Handle profile image selection
   const handleProfileImageChange = (
@@ -174,13 +178,13 @@ export default function EditProfilePage() {
 
     // Validate file type
     if (!file.type.startsWith("image/")) {
-      setError("Profile picture must be an image file");
+      setError(copy.profileImageMustBeImage);
       return;
     }
 
     // Validate file size (2MB max)
     if (file.size > 2 * 1024 * 1024) {
-      setError("Profile picture must be smaller than 2MB");
+      setError(copy.profileImageTooLarge);
       return;
     }
 
@@ -204,13 +208,13 @@ export default function EditProfilePage() {
 
     // Validate file type
     if (!file.type.startsWith("image/")) {
-      setError("Business photo must be an image file");
+      setError(copy.businessImageMustBeImage);
       return;
     }
 
     // Validate file size (2MB max)
     if (file.size > 2 * 1024 * 1024) {
-      setError("Business photo must be smaller than 2MB");
+      setError(copy.businessImageTooLarge);
       return;
     }
 
@@ -238,7 +242,7 @@ export default function EditProfilePage() {
     if (!response.ok) {
       const body = await response.json().catch(() => ({}));
       throw new Error(
-        body?.error || "Could not ensure storage bucket exists."
+        body?.error || copy.bucketEnsureFailed
       );
     }
   };
@@ -288,7 +292,7 @@ export default function EditProfilePage() {
   const handleSaveProfile = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!userId) {
-      setError("User ID not found");
+      setError(copy.userIdNotFound);
       return;
     }
 
@@ -373,7 +377,7 @@ export default function EditProfilePage() {
         if (insertInventoryError) throw insertInventoryError;
       }
 
-      setSuccessMessage("Profile saved successfully!");
+      setSuccessMessage(copy.profileSaved);
       setProfileImageFile(null);
       setBusinessImageFile(null);
       setCurrentProfileImageUrl(profileImageUrl);
@@ -384,7 +388,7 @@ export default function EditProfilePage() {
         router.push("/profile");
       }, 1500);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save profile.");
+      setError(err instanceof Error ? err.message : copy.failedSave);
     } finally {
       setIsSubmitting(false);
     }
@@ -393,7 +397,7 @@ export default function EditProfilePage() {
   // Confirm delete profile
   const handleConfirmDelete = async () => {
     if (!userId || !deletePassword) {
-      setError("Password is required");
+      setError(copy.passwordRequired);
       return;
     }
 
@@ -405,7 +409,7 @@ export default function EditProfilePage() {
       const { data: userData } = await supabase.auth.getUser();
 
       if (!userData.user?.email) {
-        throw new Error("Could not retrieve user email");
+        throw new Error(copy.couldNotGetEmail);
       }
 
       // Re-authenticate user
@@ -415,7 +419,7 @@ export default function EditProfilePage() {
       });
 
       if (authError) {
-        setError("Invalid password. Account not deleted.");
+        setError(copy.invalidPassword);
         setIsDeleting(false);
         return;
       }
@@ -458,7 +462,7 @@ export default function EditProfilePage() {
       // Redirect to login
       router.push("/login");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete account.");
+      setError(err instanceof Error ? err.message : copy.failedDelete);
       setIsDeleting(false);
     }
   };
@@ -473,7 +477,7 @@ export default function EditProfilePage() {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <p className="text-text-muted">Loading profile...</p>
+        <p className="text-text-muted">{copy.loadingProfile}</p>
       </div>
     );
   }
@@ -481,12 +485,12 @@ export default function EditProfilePage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-semibold">Edit Profile</h1>
+        <h1 className="text-3xl font-semibold">{copy.editProfile}</h1>
         <Link
           href="/profile"
           className="rounded-chip border border-border-subtle bg-surface-muted px-4 py-2 text-sm font-medium text-foreground transition hover:bg-surface"
         >
-          Back to Profile
+          {copy.backToProfile}
         </Link>
       </div>
 
@@ -504,14 +508,14 @@ export default function EditProfilePage() {
 
       <form onSubmit={handleSaveProfile} className="space-y-6">
         {/* Your Profile Section */}
-        <SectionCard title="Your Profile">
+        <SectionCard title={copy.yourProfile}>
           <div className="space-y-4">
             <div>
               <label
                 htmlFor="ownerName"
                 className="text-sm font-medium"
               >
-                Full name
+                {copy.fullName}
               </label>
               <input
                 id="ownerName"
@@ -528,14 +532,14 @@ export default function EditProfilePage() {
         </SectionCard>
 
         {/* Business Details Section */}
-        <SectionCard title="Business Details">
+        <SectionCard title={copy.businessDetails}>
           <div className="space-y-4">
             <div>
               <label
                 htmlFor="businessName"
                 className="text-sm font-medium"
               >
-                Business name
+                {copy.businessName}
               </label>
               <input
                 id="businessName"
@@ -554,7 +558,7 @@ export default function EditProfilePage() {
                 htmlFor="location"
                 className="text-sm font-medium"
               >
-                Location
+                {copy.location}
               </label>
               <input
                 id="location"
@@ -573,7 +577,7 @@ export default function EditProfilePage() {
                 htmlFor="category"
                 className="text-sm font-medium"
               >
-                Category
+                {copy.category}
               </label>
               <select
                 id="category"
@@ -586,11 +590,11 @@ export default function EditProfilePage() {
                   })
                 }
               >
-                <option value="Retail">Retail</option>
-                <option value="Food">Food</option>
-                <option value="Services">Services</option>
-                <option value="Manufacturing">Manufacturing</option>
-                <option value="Other">Other</option>
+                <option value="Retail">{translations[locale].auth.categoryLabels.Retail}</option>
+                <option value="Food">{translations[locale].auth.categoryLabels.Food}</option>
+                <option value="Services">{translations[locale].auth.categoryLabels.Services}</option>
+                <option value="Manufacturing">{translations[locale].auth.categoryLabels.Manufacturing}</option>
+                <option value="Other">{translations[locale].auth.categoryLabels.Other}</option>
               </select>
             </div>
 
@@ -599,7 +603,7 @@ export default function EditProfilePage() {
                 htmlFor="shortDescription"
                 className="text-sm font-medium"
               >
-                Description
+                {copy.description}
               </label>
               <textarea
                 id="shortDescription"
@@ -618,7 +622,7 @@ export default function EditProfilePage() {
         </SectionCard>
 
         {/* Business Preferences Section */}
-        <SectionCard title="Business Preferences">
+        <SectionCard title={copy.businessPreferences}>
           <div className="space-y-3">
             <label className="flex items-center gap-3 text-sm">
               <input
@@ -632,7 +636,7 @@ export default function EditProfilePage() {
                   })
                 }
               />
-              DTI registered
+              {copy.dtiRegistered}
             </label>
 
             <label className="flex items-center gap-3 text-sm">
@@ -647,7 +651,7 @@ export default function EditProfilePage() {
                   })
                 }
               />
-              Barter friendly
+              {copy.barterFriendly}
             </label>
 
             <label className="flex items-center gap-3 text-sm">
@@ -662,20 +666,20 @@ export default function EditProfilePage() {
                   })
                 }
               />
-              Has urgent need
+              {copy.hasUrgentNeed}
             </label>
           </div>
         </SectionCard>
 
         {/* Profile Picture Section */}
-        <SectionCard title="Profile Picture">
+        <SectionCard title={copy.profilePicture}>
           <div className="space-y-4">
             {profileImagePreview && (
               <div className="flex flex-col gap-3">
                 <div className="relative h-32 w-32 overflow-hidden rounded-full">
                   <Image
                     src={profileImagePreview}
-                    alt="Profile preview"
+                    alt={copy.profilePreviewAlt}
                     fill
                     className="object-cover"
                     unoptimized
@@ -690,7 +694,7 @@ export default function EditProfilePage() {
                   }}
                   className="w-fit text-sm text-brand underline hover:no-underline"
                 >
-                  Remove photo
+                  {copy.removePhoto}
                 </button>
               </div>
             )}
@@ -700,7 +704,7 @@ export default function EditProfilePage() {
                 htmlFor="profileImage"
                 className="text-sm font-medium"
               >
-                {profileImagePreview ? "Change photo" : "Upload photo"}
+                {profileImagePreview ? copy.changePhoto : copy.uploadPhoto}
               </label>
               <input
                 id="profileImage"
@@ -710,21 +714,21 @@ export default function EditProfilePage() {
                 onChange={handleProfileImageChange}
               />
               <p className="mt-2 text-xs text-text-muted">
-                JPG or PNG, max 2MB
+                {copy.imageHint}
               </p>
             </div>
           </div>
         </SectionCard>
 
         {/* Business Photo Section */}
-        <SectionCard title="Business Photo">
+        <SectionCard title={copy.businessPhoto}>
           <div className="space-y-4">
             {businessImagePreview && (
               <div className="flex flex-col gap-3">
                 <div className="relative h-40 w-full overflow-hidden rounded-panel">
                   <Image
                     src={businessImagePreview}
-                    alt="Business preview"
+                    alt={copy.businessPreviewAlt}
                     fill
                     className="object-cover"
                     unoptimized
@@ -739,7 +743,7 @@ export default function EditProfilePage() {
                   }}
                   className="w-fit text-sm text-brand underline hover:no-underline"
                 >
-                  Remove photo
+                  {copy.removePhoto}
                 </button>
               </div>
             )}
@@ -749,7 +753,7 @@ export default function EditProfilePage() {
                 htmlFor="businessImage"
                 className="text-sm font-medium"
               >
-                {businessImagePreview ? "Change photo" : "Upload photo"}
+                {businessImagePreview ? copy.changePhoto : copy.uploadPhoto}
               </label>
               <input
                 id="businessImage"
@@ -759,15 +763,15 @@ export default function EditProfilePage() {
                 onChange={handleBusinessImageChange}
               />
               <p className="mt-2 text-xs text-text-muted">
-                JPG or PNG, max 2MB
+                {copy.imageHint}
               </p>
             </div>
           </div>
         </SectionCard>
 
         <SectionCard
-          title="Inventory Snapshot"
-          description="Add items you have available for trade or items you're looking for. Other businesses can see this from your public profile."
+          title={copy.inventorySnapshot}
+          description={copy.inventoryDescription}
         >
           <InventoryEditor
             items={inventory}
@@ -777,7 +781,7 @@ export default function EditProfilePage() {
         </SectionCard>
 
         {/* Danger Zone Section */}
-        <SectionCard title="Danger Zone" description="Permanently delete your account and all associated data.">
+        <SectionCard title={copy.dangerZone} description={copy.dangerDescription}>
           <div className="space-y-3">
             {!showDeleteConfirmation ? (
               <button
@@ -785,18 +789,17 @@ export default function EditProfilePage() {
                 onClick={() => setShowDeleteConfirmation(true)}
                 className="rounded-chip border border-red-600 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-100"
               >
-                Delete account
+                {copy.deleteAccount}
               </button>
             ) : (
               <div className="space-y-4 rounded-panel border-border-subtle bg-surface-muted border p-4">
                 <p className="text-sm font-semibold">
-                  Enter your password to confirm deletion. This action cannot be
-                  undone.
+                  {copy.deleteConfirm}
                 </p>
 
                 <input
                   type="password"
-                  placeholder="Your password"
+                  placeholder={copy.yourPassword}
                   className="rounded-chip border-border-subtle w-full border px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
                   value={deletePassword}
                   onChange={(e) => setDeletePassword(e.target.value)}
@@ -810,14 +813,14 @@ export default function EditProfilePage() {
                     disabled={isDeleting}
                     className="rounded-chip border border-red-600 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-100 disabled:opacity-50"
                   >
-                    {isDeleting ? "Deleting..." : "Confirm delete"}
+                    {isDeleting ? copy.deleting : copy.confirmDelete}
                   </button>
                   <button
                     type="button"
                     onClick={handleCancelDelete}
                     className="rounded-chip border border-border-subtle bg-surface px-4 py-2 text-sm font-medium text-foreground transition hover:bg-surface-muted"
                   >
-                    Cancel
+                    {copy.cancel}
                   </button>
                 </div>
               </div>
@@ -834,18 +837,18 @@ export default function EditProfilePage() {
           >
             {isSubmitting ? (
               <>
-                <Spinner size="sm" color="white" ariaLabel="Saving profile" />
-                <span>Saving...</span>
+                <Spinner size="sm" color="white" ariaLabel={copy.savingProfile} />
+                <span>{copy.saving}</span>
               </>
             ) : (
-              "Save changes"
+              copy.saveChanges
             )}
           </button>
           <Link
             href="/profile"
             className="rounded-chip border border-border-subtle bg-surface-muted px-6 py-2 text-sm font-medium text-foreground transition hover:bg-surface"
           >
-            Cancel
+            {copy.cancel}
           </Link>
         </div>
       </form>

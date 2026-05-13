@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ProfileOverview } from "@/components/features/profile-overview";
+import { useLocale } from "@/lib/hooks/useLocale";
+import { translations } from "@/lib/i18n/translations";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { ConnectedBusiness, InventoryItem, Profile } from "@/lib/types/profile";
 
@@ -33,6 +35,8 @@ type BusinessOwnerRow = {
 
 export default function ProfilePage() {
   const router = useRouter();
+  const { locale } = useLocale();
+  const copy = translations[locale].profile;
   const [profileData, setProfileData] = useState<Profile | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [disconnectingOwnerId, setDisconnectingOwnerId] = useState<string | null>(null);
@@ -209,22 +213,22 @@ export default function ProfilePage() {
     <div className="space-y-4 sm:space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold leading-tight sm:text-3xl">Profile</h1>
-          <p className="mt-1 text-text-muted text-sm">Business identity, trust indicators, and inventory placeholders.</p>
+          <h1 className="text-2xl font-semibold leading-tight sm:text-3xl">{copy.profile}</h1>
+          <p className="mt-1 text-text-muted text-sm">{copy.pageDescription}</p>
         </div>
         <div className="flex gap-2">
           <Link
             href="/profile/edit"
             className="rounded-chip bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-700"
           >
-            Edit Profile
+            {copy.editProfile}
           </Link>
           <button
             onClick={handleLogout}
             disabled={isLoggingOut}
             className="rounded-chip border-border-subtle bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-800 transition hover:bg-gray-200 disabled:opacity-50"
           >
-            {isLoggingOut ? "Logging out..." : "Logout"}
+            {isLoggingOut ? copy.loggingOut : copy.logout}
           </button>
         </div>
       </div>

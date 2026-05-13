@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { routes } from "@/lib/constants/routes";
+import { useLocale } from "@/lib/hooks/useLocale";
+import { translations } from "@/lib/i18n/translations";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { BusinessConnectionState } from "@/lib/types/connection";
 
@@ -18,6 +20,8 @@ type ConnectRequestButtonProps = {
 };
 
 export function ConnectRequestButton({ receiverOwnerId }: ConnectRequestButtonProps) {
+  const { locale } = useLocale();
+  const copy = translations[locale].connections;
   const [connectionState, setConnectionState] = useState<BusinessConnectionState>("none");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -74,7 +78,7 @@ export function ConnectRequestButton({ receiverOwnerId }: ConnectRequestButtonPr
   if (!receiverOwnerId || !currentUserId || currentUserId === receiverOwnerId) {
     return (
       <button className="btn-secondary" type="button" disabled>
-        Connect
+        {copy.connect}
       </button>
     );
   }
@@ -82,7 +86,7 @@ export function ConnectRequestButton({ receiverOwnerId }: ConnectRequestButtonPr
   if (connectionState === "pending-incoming") {
     return (
       <Link href="/inbox" className="btn-secondary">
-        Respond in inbox
+        {copy.respondInInbox}
       </Link>
     );
   }
@@ -116,7 +120,7 @@ export function ConnectRequestButton({ receiverOwnerId }: ConnectRequestButtonPr
           }
         }}
       >
-        {isSubmitting ? "Cancelling..." : "Request sent"}
+        {isSubmitting ? copy.cancelling : copy.requestSent}
       </button>
     );
   }
@@ -156,7 +160,7 @@ export function ConnectRequestButton({ receiverOwnerId }: ConnectRequestButtonPr
               }
             }}
           >
-            {isSubmitting ? "Disconnecting..." : "Confirm disconnect"}
+            {isSubmitting ? copy.disconnecting : copy.confirmDisconnect}
           </button>
           <button
             className="btn-secondary disabled:cursor-not-allowed disabled:opacity-70"
@@ -166,7 +170,7 @@ export function ConnectRequestButton({ receiverOwnerId }: ConnectRequestButtonPr
               setConfirmDisconnect(false);
             }}
           >
-            Keep connected
+            {copy.keepConnected}
           </button>
         </div>
       );
@@ -178,7 +182,7 @@ export function ConnectRequestButton({ receiverOwnerId }: ConnectRequestButtonPr
           href={routes.inbox}
           className="btn-primary"
         >
-          Open inbox
+          {copy.openInbox}
         </Link>
         <button
           className="btn-secondary"
@@ -187,7 +191,7 @@ export function ConnectRequestButton({ receiverOwnerId }: ConnectRequestButtonPr
             setConfirmDisconnect(true);
           }}
         >
-          Connected
+          {copy.connected}
         </button>
       </div>
     );
@@ -222,7 +226,7 @@ export function ConnectRequestButton({ receiverOwnerId }: ConnectRequestButtonPr
         }
       }}
     >
-      {isSubmitting ? "Sending..." : "Connect"}
+      {isSubmitting ? copy.sending : copy.connect}
     </button>
   );
 }

@@ -5,17 +5,20 @@ import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { mainNavItems, routes } from "@/lib/constants/routes";
+import { translations } from "@/lib/i18n/translations";
+import { useLocale } from "@/lib/hooks/useLocale";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useInboxBadgeCount } from "@/lib/hooks/useInboxBadgeCount";
 
 type ThemeMode = "light" | "dark";
 
 export function MainNav() {
-  const [userPresent, setUserPresent] = useState(false);
+  const [userPresent] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null);
-  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
+  const [userId] = useState<string | null>(null);
+  const [profileImageUrl] = useState<string | null>(null);
+  const { locale, toggleLocale } = useLocale();
   const [theme, setTheme] = useState<ThemeMode>(() => {
     if (typeof window === "undefined") {
       return "light";
@@ -44,6 +47,8 @@ export function MainNav() {
     const nextTheme: ThemeMode = theme === "dark" ? "light" : "dark";
     setTheme(nextTheme);
   };
+
+  const copy = translations[locale];
 
   async function handleLogout() {
     const supabase = createSupabaseBrowserClient();
@@ -75,7 +80,7 @@ export function MainNav() {
                   className="text-white/80 hover:text-white rounded-full px-4 py-2 text-sm font-medium transition duration-150"
                 >
                   <span className="inline-flex items-center gap-2">
-                    <span>{item.label}</span>
+                    <span>{copy.nav[item.labelKey]}</span>
                     {item.href === routes.inbox && inboxBadgeCount > 0 ? (
                       <span className="bg-brand text-white inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold leading-none">
                         {inboxBadgeCount > 99 ? "99+" : inboxBadgeCount}
@@ -89,7 +94,7 @@ export function MainNav() {
 
           <button
             type="button"
-            aria-label="Toggle color scheme"
+            aria-label={copy.common.toggleColorScheme}
             onClick={toggleTheme}
             className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition hover:bg-white/20"
           >
@@ -105,10 +110,19 @@ export function MainNav() {
             )}
           </button>
 
+          <button
+            type="button"
+            aria-label={copy.common.toggleLanguage}
+            onClick={toggleLocale}
+            className="inline-flex h-10 min-w-12 items-center justify-center rounded-full border border-white/20 bg-white/10 px-3 text-xs font-semibold text-white transition hover:bg-white/20"
+          >
+            {copy.common.languageCode}
+          </button>
+
           {userPresent && (
             <div className="relative" ref={menuRef}>
               <button
-                aria-label="Account menu"
+                aria-label={copy.common.accountMenu}
                 aria-expanded={accountOpen}
                 onClick={() => setAccountOpen((s) => !s)}
                 className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-white/20 bg-white/10 text-white transition hover:bg-white/20"
@@ -135,13 +149,13 @@ export function MainNav() {
                     className="block px-3 py-2 text-sm text-foreground/75 hover:text-foreground hover:bg-surface-muted rounded transition"
                     onClick={() => setAccountOpen(false)}
                   >
-                    Profile
+                    {copy.common.profile}
                   </Link>
                   <button
                     onClick={handleLogout}
                     className="w-full text-left px-3 py-2 text-sm text-text-muted hover:bg-surface-muted rounded"
                   >
-                    Log out
+                    {copy.common.logout}
                   </button>
                 </div>
               )}
@@ -151,7 +165,7 @@ export function MainNav() {
 
         <button
           type="button"
-          aria-label="Open menu"
+          aria-label={copy.common.openMenu}
           aria-expanded={mobileOpen}
           aria-controls="mobile-menu"
           onClick={() => setMobileOpen((s) => !s)}
@@ -174,7 +188,7 @@ export function MainNav() {
                   className="text-foreground/75 hover:text-foreground block rounded-2xl bg-surface-muted/80 px-3 py-3 text-sm font-medium transition"
                 >
                   <span className="flex items-center justify-between gap-3">
-                    <span>{item.label}</span>
+                    <span>{copy.nav[item.labelKey]}</span>
                     {item.href === routes.inbox && inboxBadgeCount > 0 ? (
                       <span className="bg-brand text-white inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold leading-none">
                         {inboxBadgeCount > 99 ? "99+" : inboxBadgeCount}
@@ -189,7 +203,7 @@ export function MainNav() {
           <div className="mt-4 flex items-center gap-3 border-border-subtle border-t pt-4">
             <button
               type="button"
-              aria-label="Toggle color scheme"
+              aria-label={copy.common.toggleColorScheme}
               onClick={toggleTheme}
               className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border-subtle bg-surface text-foreground transition hover:bg-surface-muted"
             >
@@ -204,6 +218,15 @@ export function MainNav() {
                 </svg>
               )}
             </button>
+
+            <button
+              type="button"
+              aria-label={copy.common.toggleLanguage}
+              onClick={toggleLocale}
+              className="inline-flex h-10 min-w-12 items-center justify-center rounded-full border border-border-subtle bg-surface px-3 text-xs font-semibold text-foreground transition hover:bg-surface-muted"
+            >
+              {copy.common.languageCode}
+            </button>
           </div>
 
           {userPresent ? (
@@ -213,7 +236,7 @@ export function MainNav() {
                 onClick={() => setMobileOpen(false)}
                 className="text-foreground/75 hover:text-foreground block rounded-2xl bg-surface-muted/80 px-3 py-3 text-sm font-medium transition"
               >
-                Profile
+                {copy.common.profile}
               </Link>
               <button
                 onClick={async () => {
@@ -222,7 +245,7 @@ export function MainNav() {
                 }}
                 className="text-foreground/75 hover:text-foreground block w-full rounded-2xl bg-surface-muted/80 px-3 py-3 text-left text-sm font-medium transition"
               >
-                Log out
+                {copy.common.logout}
               </button>
             </div>
           ) : null}

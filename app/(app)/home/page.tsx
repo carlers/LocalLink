@@ -1,10 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import Image from "next/image";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { BusinessList } from "@/components/features/business-list";
 import { SectionCard } from "@/components/ui/section-card";
+import { useLocale } from "@/lib/hooks/useLocale";
+import { translations } from "@/lib/i18n/translations";
 import type { Business } from "@/lib/types/business";
 import type { BusinessConnectionState } from "@/lib/types/connection";
 
@@ -35,13 +38,15 @@ type ConnectionRequestRow = {
 };
 
 export default function HomePage() {
+  const { locale } = useLocale();
+  const copy = translations[locale].home;
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [summary, setSummary] = useState("Suggested businesses near your area.");
-  const [businessName, setBusinessName] = useState("Your business");
-  const [ownerName, setOwnerName] = useState("Business owner");
-  const [businessLocation, setBusinessLocation] = useState("Your area");
+  const [summary, setSummary] = useState<string>(copy.suggestedNearArea);
+  const [businessName, setBusinessName] = useState<string>(copy.yourBusiness);
+  const [ownerName, setOwnerName] = useState<string>(copy.businessOwner);
+  const [businessLocation, setBusinessLocation] = useState<string>(copy.yourArea);
   const [businessImageUrl, setBusinessImageUrl] = useState<string | null>(null);
   const [stats, setStats] = useState({ total: 0, urgent: 0, barter: 0 });
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -54,7 +59,7 @@ export default function HomePage() {
     { name: "Lola's Tailoring Shop", type: "Services", logo: "👗" },
   ];
 
-  const hydrateConnectionStates = async (
+  const hydrateConnectionStates = useCallback(async (
     userId: string,
     nextBusinesses: Business[],
   ) => {
@@ -122,14 +127,14 @@ export default function HomePage() {
     }
 
     setConnectionStates(nextStates);
-  };
+  }, []);
 
-  const fetchBusinesses = async (
+  const fetchBusinesses = useCallback(async (
     location = ""
   ) => {
     setIsLoading(true);
     setError(null);
-    setSummary(location ? `Loading businesses near ${location}...` : "Loading businesses across the network...");
+    setSummary(location ? `${copy.loadingNear} ${location}...` : copy.loadingAcross);
 
     try {
       const supabase = createSupabaseBrowserClient();
@@ -191,21 +196,21 @@ export default function HomePage() {
       });
       setSummary(
         formattedBusinesses.length > 0
-          ? `${formattedBusinesses.length} match${formattedBusinesses.length === 1 ? "" : "es"} found${location ? ` near ${location}` : ""}`
+          ? `${formattedBusinesses.length} ${formattedBusinesses.length === 1 ? copy.matchSingular : copy.matchPlural}${location ? ` (${location})` : ""}`
           : location
-            ? `No businesses found near ${location}.`
-            : "No businesses available yet."
+            ? `${copy.noBusinessesNear} ${location}.`
+            : copy.noBusinessesYet
       );
     } catch (fetchError) {
       const message = fetchError instanceof Error ? fetchError.message : "Unable to load businesses.";
       setError(message);
       setBusinesses([]);
       setConnectionStates({});
-      setSummary("Unable to load businesses right now.");
+      setSummary(copy.unableToLoad);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [copy, hydrateConnectionStates]);
 
   const handleConnect = async (
     business: Business,
@@ -302,9 +307,9 @@ export default function HomePage() {
             location?: string;
           } | null;
 
-          setOwnerName(metadata?.full_name ?? data.user.email ?? "Business owner");
-          setBusinessName(metadata?.business_name ?? "Your business");
-          setBusinessLocation(metadata?.location ?? "Your area");
+          setOwnerName(metadata?.full_name ?? data.user.email ?? copy.businessOwner);
+          setBusinessName(metadata?.business_name ?? copy.yourBusiness);
+          setBusinessLocation(metadata?.location ?? copy.yourArea);
           location = metadata?.location ?? "";
 
           const { data: businessData, error: businessError } = await supabase
@@ -325,31 +330,31 @@ export default function HomePage() {
     };
 
     void loadHome();
-  }, []);
+  }, [copy.businessOwner, copy.yourArea, copy.yourBusiness, fetchBusinesses]);
 
   return (
     <div className="space-y-4 sm:space-y-6">
       <section className="rounded-panel border-border-subtle bg-surface border p-4 shadow-sm shadow-surface-muted/40 sm:p-6">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-2xl">
-            <p className="text-sm uppercase tracking-[0.28em] text-brand">Home</p>
-            <h1 className="mt-2 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">Welcome back, {ownerName}.</h1>
+            <p className="text-sm uppercase tracking-[0.28em] text-brand">{copy.header}</p>
+            <h1 className="mt-2 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">{copy.welcomeBack}, {ownerName}.</h1>
             <p className="mt-3 text-text-muted sm:text-base">
-              Browse local suppliers, urgent needs, and barter-friendly partners near {businessLocation}.
+              {copy.browseHint} {businessLocation}.
             </p>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3 lg:min-w-[320px]">
             <div className="rounded-chip bg-surface-muted p-4 text-sm">
-              <p className="text-text-muted">Matches</p>
+              <p className="text-text-muted">{copy.matches}</p>
               <p className="mt-2 text-2xl font-semibold text-foreground">{stats.total}</p>
             </div>
             <div className="rounded-chip bg-surface-muted p-4 text-sm">
-              <p className="text-text-muted">Urgent needs</p>
+              <p className="text-text-muted">{copy.urgentNeeds}</p>
               <p className="mt-2 text-2xl font-semibold text-foreground">{stats.urgent}</p>
             </div>
             <div className="rounded-chip bg-surface-muted p-4 text-sm">
-              <p className="text-text-muted">Barter friendly</p>
+              <p className="text-text-muted">{copy.barterFriendly}</p>
               <p className="mt-2 text-2xl font-semibold text-foreground">{stats.barter}</p>
             </div>
           </div>
@@ -358,47 +363,50 @@ export default function HomePage() {
 
       <div className="grid gap-6 lg:grid-cols-[285px_1fr]">
         <aside className="space-y-6">
-          <SectionCard title="Business summary">
+          <SectionCard title={copy.businessSummary}>
             <div className="space-y-4">
               <div className="rounded-panel border-border-subtle bg-surface border p-4 space-y-4">
                 {businessImageUrl ? (
                   <div className="overflow-hidden rounded-3xl bg-surface-muted">
-                    <img
+                    <Image
                       src={businessImageUrl}
                       alt={`Photo of ${businessName}`}
+                      width={640}
+                      height={320}
                       className="h-36 w-full object-cover"
+                      unoptimized
                     />
                   </div>
                 ) : (
                   <div className="flex h-36 items-center justify-center rounded-3xl bg-surface-muted text-sm text-text-muted">
-                    No business photo yet
+                    {copy.noBusinessPhoto}
                   </div>
                 )}
                 <div>
-                  <p className="text-sm text-text-muted">Business</p>
+                  <p className="text-sm text-text-muted">{copy.business}</p>
                   <p className="mt-2 text-lg font-semibold text-foreground">{businessName}</p>
                   <p className="mt-1 text-sm text-text-muted">{businessLocation}</p>
                 </div>
               </div>
 
               <div className="rounded-panel border-border-subtle bg-surface border p-4">
-                <p className="text-sm text-text-muted">Quick actions</p>
+                <p className="text-sm text-text-muted">{copy.quickActions}</p>
                 <div className="mt-3 grid gap-3">
                   <Link href="/discover" className="rounded-chip bg-brand px-4 py-3 text-sm font-semibold text-white text-center transition hover:bg-teal-700 sm:py-2">
-                    Browse suppliers
+                    {copy.browseSuppliers}
                   </Link>
                   <Link href="/profile" className="rounded-chip border border-border-subtle bg-surface-muted px-4 py-3 text-sm font-medium text-foreground text-center transition hover:bg-surface sm:py-2">
-                    View profile
+                    {copy.viewProfile}
                   </Link>
                   <Link href="/inbox" className="rounded-chip border border-border-subtle bg-surface-muted px-4 py-3 text-sm font-medium text-foreground text-center transition hover:bg-surface sm:py-2">
-                    Check inbox
+                    {copy.checkInbox}
                   </Link>
                 </div>
               </div>
             </div>
           </SectionCard>
 
-          <SectionCard title="Trusted partners" description="Local businesses already working with the network.">
+          <SectionCard title={copy.trustedPartners} description={copy.trustedPartnersDesc}>
             <div className="space-y-3">
               {trustedPartners.map((partner) => (
                 <div key={partner.name} className="flex items-center gap-3 rounded-panel border-border-subtle bg-surface border p-3">
@@ -416,7 +424,7 @@ export default function HomePage() {
         </aside>
 
         <main className="space-y-6">
-          <SectionCard title="Nearby matches" description={summary}>
+          <SectionCard title={copy.nearbyMatches} description={summary}>
             {error ? (
               <div className="rounded-panel border-border-subtle bg-status-error-bg border border-status-error-fg p-4 text-sm text-status-error-fg">
                 {error}
@@ -425,13 +433,13 @@ export default function HomePage() {
 
             {isLoading ? (
               <div className="rounded-panel border-border-subtle bg-surface-muted border p-4 text-sm text-text-muted">
-                Loading businesses...
+                {copy.loadingBusinesses}
               </div>
             ) : null}
 
             {!isLoading && businesses.length === 0 && !error ? (
               <div className="rounded-panel border-border-subtle bg-surface-muted border p-4 text-sm text-text-muted">
-                No businesses available yet. Try broadening your search or updating your filters.
+                {copy.emptyMatches}
               </div>
             ) : null}
 

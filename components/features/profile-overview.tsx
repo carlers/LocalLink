@@ -1,4 +1,8 @@
+"use client";
+
 import Image from "next/image";
+import { useLocale } from "@/lib/hooks/useLocale";
+import { translations } from "@/lib/i18n/translations";
 import type { Profile } from "@/lib/types/profile";
 
 type ProfileOverviewProps = {
@@ -12,11 +16,14 @@ export function ProfileOverview({
   onDisconnect,
   disconnectingOwnerId,
 }: ProfileOverviewProps) {
+  const { locale } = useLocale();
+  const copy = translations[locale].profile;
+
   if (!profile) {
     return (
       <div className="rounded-panel border-border-subtle bg-surface border p-6">
-        <h2 className="text-foreground text-lg font-semibold">Profile</h2>
-        <p className="text-text-muted mt-3 text-sm">No profile data available yet.</p>
+        <h2 className="text-foreground text-lg font-semibold">{copy.profile}</h2>
+        <p className="text-text-muted mt-3 text-sm">{copy.noProfileData}</p>
       </div>
     );
   }
@@ -45,16 +52,16 @@ export function ProfileOverview({
           </div>
 
           <div className="space-y-2">
-            <p className="text-xs uppercase tracking-[0.24em] text-text-muted">Your business profile</p>
+            <p className="text-xs uppercase tracking-[0.24em] text-text-muted">{copy.yourBusinessProfile}</p>
             <h2 className="text-2xl font-semibold text-foreground">{profile.businessName}</h2>
-            <p className="text-sm text-text-muted">Owned by {profile.ownerName}</p>
+            <p className="text-sm text-text-muted">{copy.ownedBy} {profile.ownerName}</p>
             <p className="text-sm text-text-muted">{profile.location}</p>
             <div className="flex flex-wrap gap-2 pt-3">
               <span className="rounded-full bg-brand/10 px-3 py-1 text-xs font-semibold text-brand">
-                Trust Score {profile.trustScore}
+                {copy.trustScoreLabel} {profile.trustScore}
               </span>
               <span className="rounded-full bg-surface-muted px-3 py-1 text-xs font-medium text-foreground">
-                {profile.connections} Connections
+                {profile.connections} {copy.connections}
               </span>
             </div>
           </div>
@@ -63,9 +70,9 @@ export function ProfileOverview({
 
       <div className="grid gap-4 xl:grid-cols-[1.4fr_0.8fr]">
         <section className="rounded-panel border-border-subtle bg-surface border p-6">
-          <h3 className="text-lg font-semibold text-foreground">Inventory Snapshot</h3>
+          <h3 className="text-lg font-semibold text-foreground">{copy.inventorySnapshot}</h3>
           {profile.inventory.length === 0 ? (
-            <p className="mt-3 text-sm text-text-muted">No inventory items yet. Add items to make your profile more discoverable.</p>
+            <p className="mt-3 text-sm text-text-muted">{copy.noInventoryItems}</p>
           ) : (
             <ul className="mt-4 grid gap-3 md:grid-cols-2">
               {profile.inventory.map((item) => (
@@ -79,8 +86,8 @@ export function ProfileOverview({
         </section>
 
         <section className="rounded-panel border-border-subtle bg-surface border p-6">
-          <h3 className="text-lg font-semibold text-foreground">Trust & Network</h3>
-          <p className="mt-3 text-sm text-text-muted">A stronger trust score helps local buyers choose your business.</p>
+          <h3 className="text-lg font-semibold text-foreground">{copy.trustAndNetwork}</h3>
+          <p className="mt-3 text-sm text-text-muted">{copy.trustScoreHelp}</p>
           <div className="mt-4">
             <div className="h-2 overflow-hidden rounded-full bg-surface-muted">
               <div
@@ -89,15 +96,15 @@ export function ProfileOverview({
               />
             </div>
             <div className="mt-3 flex items-center justify-between text-sm text-text-muted">
-              <span>Trust score</span>
+              <span>{copy.trustScore}</span>
               <span>{profile.trustScore}%</span>
             </div>
           </div>
 
           <div className="mt-6 space-y-3">
             <div className="rounded-panel border-border-subtle bg-surface-muted border p-4">
-              <p className="text-sm font-medium text-foreground">Connected businesses</p>
-              <p className="mt-1 text-sm text-text-muted">{profile.connectedBusinesses.length} trusted partners</p>
+              <p className="text-sm font-medium text-foreground">{copy.connectedBusinesses}</p>
+              <p className="mt-1 text-sm text-text-muted">{profile.connectedBusinesses.length} {copy.trustedPartners}</p>
             </div>
           </div>
         </section>
@@ -106,19 +113,19 @@ export function ProfileOverview({
       <section className="rounded-panel border-border-subtle bg-surface border p-6">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h3 className="text-lg font-semibold text-foreground">Connected Businesses</h3>
-            <p className="mt-1 text-sm text-text-muted">Manage partner relationships from one place.</p>
+            <h3 className="text-lg font-semibold text-foreground">{copy.connectedBusinessesTitle}</h3>
+            <p className="mt-1 text-sm text-text-muted">{copy.managePartners}</p>
           </div>
         </div>
 
         {profile.connectedBusinesses.length === 0 ? (
-          <p className="mt-4 text-sm text-text-muted">No connected businesses yet. Use Discover to find nearby partners.</p>
+          <p className="mt-4 text-sm text-text-muted">{copy.noConnectedBusinesses}</p>
         ) : (
           <ul className="mt-4 grid gap-3 sm:grid-cols-2">
             {profile.connectedBusinesses.map((connectedBusiness) => (
               <li key={connectedBusiness.id} className="rounded-panel border-border-subtle bg-surface-muted border p-4">
                 <p className="font-semibold text-foreground">{connectedBusiness.businessName}</p>
-                <p className="mt-1 text-sm text-text-muted">Owner: {connectedBusiness.ownerName}</p>
+                <p className="mt-1 text-sm text-text-muted">{copy.owner}: {connectedBusiness.ownerName}</p>
                 <p className="text-sm text-text-muted">{connectedBusiness.location}</p>
                 <button
                   type="button"
@@ -129,7 +136,7 @@ export function ProfileOverview({
                     void onDisconnect(connectedBusiness.ownerId);
                   }}
                 >
-                  {disconnectingOwnerId === connectedBusiness.ownerId ? "Disconnecting..." : "Disconnect"}
+                  {disconnectingOwnerId === connectedBusiness.ownerId ? copy.disconnecting : copy.disconnect}
                 </button>
               </li>
             ))}

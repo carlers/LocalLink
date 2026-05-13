@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { getCities, getBarangaysForCity } from "@/lib/constants/locations";
+import { useLocale } from "@/lib/hooks/useLocale";
+import { translations } from "@/lib/i18n/translations";
 
 type DiscoverSearchProps = {
   onFilter: (query: string, category: string, city: string, barangay: string) => void;
@@ -11,6 +13,8 @@ type DiscoverSearchProps = {
 const CATEGORIES = ["All", "Retail", "Food", "Services", "Manufacturing", "Other"];
 
 export function DiscoverSearch({ onFilter, isLoading = false }: DiscoverSearchProps) {
+  const { locale } = useLocale();
+  const copy = translations[locale].discoverSearch;
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedCity, setSelectedCity] = useState("");
@@ -50,12 +54,12 @@ export function DiscoverSearch({ onFilter, isLoading = false }: DiscoverSearchPr
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <div>
           <label className="block text-sm font-medium" htmlFor="search">
-            Search businesses
+            {copy.searchBusinesses}
           </label>
           <input
             id="search"
             type="text"
-            placeholder="Business name or description"
+            placeholder={copy.searchPlaceholder}
             className="rounded-chip border-border-subtle mt-2 w-full border px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
             value={searchQuery}
             onChange={(e) => handleSearch(e.target.value)}
@@ -65,7 +69,7 @@ export function DiscoverSearch({ onFilter, isLoading = false }: DiscoverSearchPr
 
         <div>
           <label className="block text-sm font-medium" htmlFor="city">
-            City
+            {copy.city}
           </label>
           <select
             id="city"
@@ -74,7 +78,7 @@ export function DiscoverSearch({ onFilter, isLoading = false }: DiscoverSearchPr
             onChange={(e) => handleCityChange(e.target.value)}
             disabled={isLoading}
           >
-            <option value="">All cities</option>
+            <option value="">{copy.allCities}</option>
             {getCities().map((city) => (
               <option key={city} value={city}>
                 {city}
@@ -85,7 +89,7 @@ export function DiscoverSearch({ onFilter, isLoading = false }: DiscoverSearchPr
 
         <div>
           <label className="block text-sm font-medium" htmlFor="barangay">
-            Barangay
+            {copy.barangay}
           </label>
           <select
             id="barangay"
@@ -94,7 +98,7 @@ export function DiscoverSearch({ onFilter, isLoading = false }: DiscoverSearchPr
             onChange={(e) => handleBarangayChange(e.target.value)}
             disabled={isLoading || !selectedCity}
           >
-            <option value="">All barangays</option>
+            <option value="">{copy.allBarangays}</option>
             {selectedCity
               ? getBarangaysForCity(selectedCity).map((barangay) => (
                 <option key={barangay} value={barangay}>
@@ -107,7 +111,7 @@ export function DiscoverSearch({ onFilter, isLoading = false }: DiscoverSearchPr
       </div>
 
       <div>
-        <label className="block text-sm font-medium">Category</label>
+        <label className="block text-sm font-medium">{copy.category}</label>
         <div className="mt-2 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
           {CATEGORIES.map((category) => (
             <button
@@ -117,7 +121,7 @@ export function DiscoverSearch({ onFilter, isLoading = false }: DiscoverSearchPr
               disabled={isLoading}
               type="button"
             >
-              {category}
+              {copy.categoryLabels[category as keyof typeof copy.categoryLabels]}
             </button>
           ))}
         </div>
@@ -130,7 +134,7 @@ export function DiscoverSearch({ onFilter, isLoading = false }: DiscoverSearchPr
           className="text-sm font-medium text-brand underline-offset-4 hover:underline"
           type="button"
         >
-          Clear filters
+          {copy.clearFilters}
         </button>
       )}
     </div>

@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { routes } from "@/lib/constants/routes";
+import { useLocale } from "@/lib/hooks/useLocale";
+import { translations } from "@/lib/i18n/translations";
 import { Spinner } from "@/components/ui/spinner";
 import type { BusinessCategory } from "@/lib/types/business";
 import { getCities, getBarangaysForCity } from "@/lib/constants/locations";
@@ -16,6 +18,8 @@ type AuthFormProps = {
 
 export function AuthForm({ mode }: AuthFormProps) {
   const router = useRouter();
+  const { locale } = useLocale();
+  const copy = translations[locale].auth;
   const [fullName, setFullName] = useState("");
   const [businessName, setBusinessName] = useState("");
   const [city, setCity] = useState("");
@@ -72,7 +76,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           return;
         }
 
-        setStatusMessage("Account created. Check your email to confirm the signup, then log in.");
+        setStatusMessage(copy.signupSuccess);
         return;
       }
 
@@ -88,7 +92,7 @@ export function AuthForm({ mode }: AuthFormProps) {
       router.push(routes.home);
       router.refresh();
     } catch (authError) {
-      const message = authError instanceof Error ? authError.message : "Authentication failed.";
+      const message = authError instanceof Error ? authError.message : copy.authFailed;
       setErrorMessage(message);
     } finally {
       setIsSubmitting(false);
@@ -100,14 +104,14 @@ export function AuthForm({ mode }: AuthFormProps) {
       {isSignup ? (
         <>
           <label className="text-sm font-semibold text-white" htmlFor="fullName">
-            Full name
+            {copy.fullName}
           </label>
           <input
             id="fullName"
             name="fullName"
             type="text"
             className="rounded-2xl border-border-subtle bg-background/80 mt-1 w-full border px-4 py-3 text-white placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
-            placeholder="Juan Dela Cruz"
+            placeholder={copy.fullNamePlaceholder}
             value={fullName}
             onChange={(event) => setFullName(event.target.value)}
             autoComplete="name"
@@ -115,14 +119,14 @@ export function AuthForm({ mode }: AuthFormProps) {
           />
 
           <label className="mt-4 block text-sm font-semibold text-white" htmlFor="businessName">
-            Business name
+            {copy.businessName}
           </label>
           <input
             id="businessName"
             name="businessName"
             type="text"
             className="rounded-2xl border-border-subtle bg-background/80 mt-1 w-full border px-4 py-3 text-white placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
-            placeholder="Your business name"
+            placeholder={copy.businessNamePlaceholder}
             value={businessName}
             onChange={(event) => setBusinessName(event.target.value)}
             autoComplete="organization"
@@ -130,7 +134,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           />
 
           <label className="mt-4 block text-sm font-semibold text-white" htmlFor="city">
-            City
+            {copy.city}
           </label>
           <select
             id="city"
@@ -143,7 +147,7 @@ export function AuthForm({ mode }: AuthFormProps) {
             }}
             required
           >
-            <option value="">Select city</option>
+            <option value="">{copy.selectCity}</option>
             {getCities().map((c) => (
               <option key={c} value={c}>
                 {c}
@@ -152,7 +156,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           </select>
 
           <label className="mt-4 block text-sm font-semibold text-white" htmlFor="barangay">
-            Barangay
+            {copy.barangay}
           </label>
           <select
             id="barangay"
@@ -162,7 +166,7 @@ export function AuthForm({ mode }: AuthFormProps) {
             onChange={(event) => setBarangay(event.target.value)}
             required
           >
-            <option value="">Select barangay</option>
+            <option value="">{copy.selectBarangay}</option>
             {city
               ? getBarangaysForCity(city).map((b) => (
                 <option key={b} value={b}>
@@ -173,7 +177,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           </select>
 
           <label className="mt-4 block text-sm font-semibold text-white" htmlFor="category">
-            Business category
+            {copy.businessCategory}
           </label>
           <select
             id="category"
@@ -183,28 +187,28 @@ export function AuthForm({ mode }: AuthFormProps) {
             onChange={(event) => setCategory(event.target.value as BusinessCategory)}
             required
           >
-            <option value="Retail">Retail</option>
-            <option value="Food">Food</option>
-            <option value="Services">Services</option>
-            <option value="Manufacturing">Manufacturing</option>
-            <option value="Other">Other</option>
+            <option value="Retail">{copy.categoryLabels.Retail}</option>
+            <option value="Food">{copy.categoryLabels.Food}</option>
+            <option value="Services">{copy.categoryLabels.Services}</option>
+            <option value="Manufacturing">{copy.categoryLabels.Manufacturing}</option>
+            <option value="Other">{copy.categoryLabels.Other}</option>
           </select>
 
           <label className="mt-4 block text-sm font-semibold text-white" htmlFor="shortDescription">
-            Short description
+            {copy.shortDescription}
           </label>
           <textarea
             id="shortDescription"
             name="shortDescription"
             className="rounded-2xl border-border-subtle bg-background/80 mt-1 min-h-24 w-full border px-4 py-3 text-white placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
-            placeholder="Tell others what your business offers or needs."
+            placeholder={copy.shortDescriptionPlaceholder}
             value={shortDescription}
             onChange={(event) => setShortDescription(event.target.value)}
             required
           />
 
           <div className="mt-5 space-y-3 rounded-panel border-border-subtle bg-surface-muted border p-4">
-            <p className="text-sm font-semibold text-white">Business details</p>
+            <p className="text-sm font-semibold text-white">{copy.businessDetails}</p>
 
             <label className="flex items-center gap-3 text-sm text-text-muted" htmlFor="isDtiRegistered">
               <input
@@ -215,7 +219,7 @@ export function AuthForm({ mode }: AuthFormProps) {
                 checked={isDtiRegistered}
                 onChange={(event) => setIsDtiRegistered(event.target.checked)}
               />
-              DTI registered
+              {copy.dtiRegistered}
             </label>
 
             <label className="flex items-center gap-3 text-sm text-text-muted" htmlFor="isBarterFriendly">
@@ -227,7 +231,7 @@ export function AuthForm({ mode }: AuthFormProps) {
                 checked={isBarterFriendly}
                 onChange={(event) => setIsBarterFriendly(event.target.checked)}
               />
-              Open to barter or trade
+              {copy.openToBarter}
             </label>
 
             <label className="flex items-center gap-3 text-sm text-text-muted" htmlFor="hasUrgentNeed">
@@ -239,21 +243,21 @@ export function AuthForm({ mode }: AuthFormProps) {
                 checked={hasUrgentNeed}
                 onChange={(event) => setHasUrgentNeed(event.target.checked)}
               />
-              Has an urgent need right now
+              {copy.hasUrgentNeed}
             </label>
           </div>
         </>
       ) : null}
 
       <label className={isSignup ? "mt-4 block text-sm font-semibold text-white" : "text-sm font-semibold text-white"} htmlFor="email">
-        Email
+        {copy.email}
       </label>
       <input
         id="email"
         name="email"
         type="email"
         className="rounded-2xl border-border-subtle bg-background/80 mt-1 w-full border px-4 py-3 text-white placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
-        placeholder="you@business.com"
+        placeholder={copy.emailPlaceholder}
         value={email}
         onChange={(event) => setEmail(event.target.value)}
         autoComplete="email"
@@ -261,14 +265,14 @@ export function AuthForm({ mode }: AuthFormProps) {
       />
 
       <label className="mt-4 block text-sm font-semibold text-white" htmlFor="password">
-        Password
+        {copy.password}
       </label>
       <input
         id="password"
         name="password"
         type="password"
         className="rounded-2xl border-border-subtle bg-background/80 mt-1 w-full border px-4 py-3 text-white placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
-        placeholder={isSignup ? "Create password" : "Enter password"}
+        placeholder={isSignup ? copy.createPassword : copy.enterPassword}
         value={password}
         onChange={(event) => setPassword(event.target.value)}
         autoComplete={isSignup ? "new-password" : "current-password"}
@@ -285,13 +289,13 @@ export function AuthForm({ mode }: AuthFormProps) {
       >
         {isSubmitting ? (
           <>
-            <Spinner size="sm" color="white" ariaLabel="Submitting form" />
-            <span>Please wait...</span>
+            <Spinner size="sm" color="white" ariaLabel={copy.submitAria} />
+            <span>{copy.pleaseWait}</span>
           </>
         ) : isSignup ? (
-          "Sign Up"
+          copy.signUpButton
         ) : (
-          "Log In"
+          copy.logInButton
         )}
       </button>
     </form>

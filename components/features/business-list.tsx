@@ -4,8 +4,17 @@ import Image from "next/image";
 import { useState } from "react";
 import Link from "next/link";
 import { Spinner } from "@/components/ui/spinner";
+import { useLocale } from "@/lib/hooks/useLocale";
+import { translations } from "@/lib/i18n/translations";
 import type { Business } from "@/lib/types/business";
 import type { BusinessConnectionState } from "@/lib/types/connection";
+
+type ConnectionsCopy = {
+  connect: string;
+  requestSent: string;
+  respondInInbox: string;
+  connected: string;
+};
 
 type BusinessListProps = {
   businesses: Business[];
@@ -14,20 +23,20 @@ type BusinessListProps = {
   onConnect?: (business: Business, connectionState: BusinessConnectionState) => void | Promise<void>;
 };
 
-function resolveConnectLabel(connectionState: BusinessConnectionState | undefined) {
+function resolveConnectLabel(connectionState: BusinessConnectionState | undefined, copy: ConnectionsCopy) {
   if (connectionState === "pending-outgoing") {
-    return "Request sent";
+    return copy.requestSent;
   }
 
   if (connectionState === "pending-incoming") {
-    return "Respond in inbox";
+    return copy.respondInInbox;
   }
 
   if (connectionState === "connected") {
-    return "Connected";
+    return copy.connected;
   }
 
-  return "Connect";
+  return copy.connect;
 }
 
 export function BusinessList({
@@ -36,6 +45,8 @@ export function BusinessList({
   connectLoadingBusinessId,
   onConnect,
 }: BusinessListProps) {
+  const { locale } = useLocale();
+  const copy = translations[locale].connections;
   const [confirmDisconnectBusinessId, setConfirmDisconnectBusinessId] = useState<string | null>(null);
 
   const formatLocation = (business: Business) =>
@@ -62,7 +73,7 @@ export function BusinessList({
               ) : (
                 <div className="flex h-full w-full items-end bg-gradient-to-br from-brand/20 via-surface-muted to-surface-muted p-3">
                   <span className="text-xs font-semibold uppercase tracking-[0.24em] text-text-muted">
-                    No business photo yet
+                    {copy.noBusinessPhoto}
                   </span>
                 </div>
               )}
@@ -78,17 +89,17 @@ export function BusinessList({
                 <div className="flex flex-wrap items-center gap-1 text-xs font-medium uppercase tracking-[0.16em] text-text-muted">
                   {business.isDtiRegistered && (
                     <span className="rounded-full border border-brand/20 bg-brand/10 px-2 py-0.5 text-brand">
-                      DTI Registered
+                      {copy.dtiRegistered}
                     </span>
                   )}
                   {business.isBarterFriendly && (
                     <span className="rounded-full border border-foreground/10 bg-surface-muted px-2 py-0.5">
-                      Barter Friendly
+                      {copy.barterFriendly}
                     </span>
                   )}
                   {business.hasUrgentNeed && (
                     <span className="rounded-full border border-accent-urgent/20 bg-accent-urgent/10 px-2 py-0.5 text-accent-urgent">
-                      Urgent Need
+                      {copy.urgentNeed}
                     </span>
                   )}
                 </div>
@@ -101,14 +112,14 @@ export function BusinessList({
                   href={`/business/${business.id}`}
                   className="btn-primary text-xs px-3 py-1.5"
                 >
-                  View profile
+                  {copy.viewProfile}
                 </Link>
                 {connectionStates?.[business.id] === "pending-incoming" ? (
                   <Link
                     href="/inbox"
                     className="btn-secondary text-xs px-3 py-1.5"
                   >
-                    Respond in inbox
+                    {copy.respondInInbox}
                   </Link>
                 ) : (
                   <button
@@ -126,11 +137,11 @@ export function BusinessList({
                     }}
                   >
                     {connectLoadingBusinessId === business.id ? (
-                      <Spinner size="sm" color="muted" ariaLabel="Processing request" />
+                      <Spinner size="sm" color="muted" ariaLabel={copy.processingRequest} />
                     ) : isConfirmingDisconnect ? (
-                      "Confirm disconnect"
+                      copy.confirmDisconnect
                     ) : (
-                      resolveConnectLabel(connectionState)
+                      resolveConnectLabel(connectionState, copy)
                     )}
                   </button>
                 )}

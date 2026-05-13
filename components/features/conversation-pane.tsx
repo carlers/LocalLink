@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { routes } from '@/lib/constants/routes';
+import { useLocale } from '@/lib/hooks/useLocale';
+import { translations } from '@/lib/i18n/translations';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { useRealtimeMessages } from '@/lib/hooks/useRealtimeMessages';
 import { Spinner } from '@/components/ui/spinner';
@@ -45,14 +47,14 @@ const toMessageRow = (message: Message): MessageRow => ({
   is_unread: message.isUnread,
 });
 
-const formatTimestamp = (value: string) => {
+const formatTimestamp = (value: string, locale: string) => {
   const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
     return value;
   }
 
-  return new Intl.DateTimeFormat('en-PH', {
+  return new Intl.DateTimeFormat(locale === 'tl' ? 'fil-PH' : 'en-PH', {
     month: 'short',
     day: 'numeric',
     hour: 'numeric',
@@ -61,9 +63,11 @@ const formatTimestamp = (value: string) => {
 };
 
 export function ConversationPane({ conversationId, compact = false, onBackToInbox }: ConversationPaneProps) {
+  const { locale } = useLocale();
+  const copy = translations[locale].conversation;
   const [conversation, setConversation] = useState<ConversationRow | null>(null);
   const [messages, setMessages] = useState<MessageRow[]>([]);
-  const [currentUserName, setCurrentUserName] = useState<string>('You');
+  const [currentUserName, setCurrentUserName] = useState<string>(copy.you);
   const [draft, setDraft] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
@@ -88,7 +92,7 @@ export function ConversationPane({ conversationId, compact = false, onBackToInbo
       setConversation(null);
       setMessages([]);
       setLoading(false);
-      setError('Please sign in to view conversations.');
+      setError(copy.signInToView);
       return;
     }
 
@@ -119,11 +123,11 @@ export function ConversationPane({ conversationId, compact = false, onBackToInbo
       setConversation(null);
       setMessages([]);
       setLoading(false);
-      setError('Conversation not found.');
+      setError(copy.conversationNotFound);
       return;
     }
 
-    const displayName = profileResult.data?.business_name || profileResult.data?.owner_name || 'You';
+    const displayName = profileResult.data?.business_name || profileResult.data?.owner_name || copy.you;
     setCurrentUserName(displayName);
     setConversation(conversationResult.data);
 
@@ -156,7 +160,7 @@ export function ConversationPane({ conversationId, compact = false, onBackToInbo
     }
 
     setLoading(false);
-  }, [conversationId]);
+  }, [conversationId, copy.conversationNotFound, copy.signInToView, copy.you]);
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -214,7 +218,7 @@ export function ConversationPane({ conversationId, compact = false, onBackToInbo
       const { data: authData } = await supabase.auth.getUser();
 
       if (!authData.user?.id) {
-        throw new Error('Please sign in to send messages.');
+        throw new Error(copy.signInToSend);
       }
 
       const { data: profileData, error: profileError } = await supabase
@@ -227,7 +231,7 @@ export function ConversationPane({ conversationId, compact = false, onBackToInbo
         throw profileError;
       }
 
-      const senderName = profileData?.business_name || profileData?.owner_name || 'You';
+      const senderName = profileData?.business_name || profileData?.owner_name || copy.you;
       const now = new Date().toISOString();
 
       setMessages((prev) => [
@@ -282,19 +286,19 @@ export function ConversationPane({ conversationId, compact = false, onBackToInbo
         }
       }
     } catch (sendError) {
-      setError(sendError instanceof Error ? sendError.message : 'Failed to send message.');
+      setError(sendError instanceof Error ? sendError.message : copy.failedToSend);
     } finally {
       setSending(false);
     }
   };
 
-  const partnerLabel = conversation?.partner_name ?? 'Conversation';
+  const partnerLabel = conversation?.partner_name ?? copy.title;
 
   if (!conversationId) {
     return (
       <section className="rounded-panel border-border-subtle bg-surface h-full min-h-0 overflow-hidden border p-4 sm:p-5">
-        <h2 className="text-foreground text-lg font-semibold">Conversation</h2>
-        <p className="text-text-muted mt-3 text-sm">Select a conversation to open the chat.</p>
+        <h2 className="text-foreground text-lg font-semibold">{copy.title}</h2>
+        <p className="text-text-muted mt-3 text-sm">{copy.selectConversationHint}</p>
       </section>
     );
   }
@@ -305,10 +309,10 @@ export function ConversationPane({ conversationId, compact = false, onBackToInbo
         <div className="min-w-0">
           <p className="text-text-muted text-sm">
             <Link href={routes.inbox} className="hover:text-foreground transition">
-              Inbox
+              {translations[locale].nav.inbox}
             </Link>
             <span className="mx-2">/</span>
-            Conversation
+            {copy.title}
           </p>
           <h2 className="truncate text-2xl font-semibold leading-tight">{partnerLabel}</h2>
         </div>
@@ -318,7 +322,7 @@ export function ConversationPane({ conversationId, compact = false, onBackToInbo
             onClick={onBackToInbox}
             className="rounded-full border border-border-subtle bg-surface px-4 py-2 text-sm font-medium text-foreground transition hover:bg-surface-muted md:hidden"
           >
-            Back
+            {copy.back}
           </button>
         ) : null}
       </div>
@@ -330,7 +334,7 @@ export function ConversationPane({ conversationId, compact = false, onBackToInbo
           {loading ? (
             <ConversationLoadingFallback messageCount={4} />
           ) : messages.length === 0 ? (
-            <p className="text-text-muted text-sm">No messages yet. Start the conversation below.</p>
+            <p className="text-text-muted text-sm">{copy.emptyMessages}</p>
           ) : (
             <div className="space-y-3">
               {messages.map((message) => {
@@ -341,7 +345,7 @@ export function ConversationPane({ conversationId, compact = false, onBackToInbo
                     <div className={`max-w-[85%] rounded-2xl px-4 py-3 ${isOwnMessage ? 'bg-brand text-white' : 'bg-surface-muted text-foreground'}`}>
                       <p className="text-sm font-medium">{message.sender_name}</p>
                       <p className="mt-1 text-sm leading-6">{message.preview}</p>
-                      <p className={`mt-2 text-xs ${isOwnMessage ? 'text-white/80' : 'text-text-muted'}`}>{formatTimestamp(message.sent_at)}</p>
+                      <p className={`mt-2 text-xs ${isOwnMessage ? 'text-white/80' : 'text-text-muted'}`}>{formatTimestamp(message.sent_at, locale)}</p>
                     </div>
                   </div>
                 );
@@ -363,7 +367,7 @@ export function ConversationPane({ conversationId, compact = false, onBackToInbo
                 }
               }}
               rows={compact ? 2 : 3}
-              placeholder="Type your reply..."
+              placeholder={copy.typeReply}
               className="border-border-subtle bg-background text-foreground block min-h-[3.25rem] w-full resize-none rounded-2xl border px-4 py-2.5 pr-28 text-sm outline-none transition placeholder:text-text-muted focus:border-brand"
             />
             <button
@@ -374,10 +378,10 @@ export function ConversationPane({ conversationId, compact = false, onBackToInbo
             >
               {sending ? (
                 <>
-                  <Spinner size="sm" color="white" ariaLabel="Sending message" />
+                  <Spinner size="sm" color="white" ariaLabel={copy.sendingMessage} />
                 </>
               ) : (
-                'Send'
+                copy.send
               )}
             </button>
           </div>
