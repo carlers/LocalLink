@@ -9,9 +9,11 @@ export const routes = {
   signup: "/signup",
 } as const;
 
+export type MainNavLabelKey = "home" | "discover" | "inbox" | "profile";
+
 export const mainNavItems = [
-  { href: routes.home, label: "Home" },
-  { href: routes.discover, label: "Discover" },
-  { href: routes.inbox, label: "Inbox" },
-  { href: routes.profile, label: "Profile" },
+  { href: routes.home, labelKey: "home" },
+  { href: routes.discover, labelKey: "discover" },
+  { href: routes.inbox, labelKey: "inbox" },
+  { href: routes.profile, labelKey: "profile" },
 ] as const;

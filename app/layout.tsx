@@ -31,9 +31,12 @@ const themeScript = `
 (function() {
   try {
     var stored = window.localStorage.getItem('theme');
+    var storedLocale = window.localStorage.getItem('locale');
     var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     var theme = stored === 'dark' || stored === 'light' ? stored : prefersDark ? 'dark' : 'light';
+    var locale = storedLocale === 'tl' ? 'tl' : 'en';
     document.documentElement.classList.add('theme-' + theme);
+    document.documentElement.lang = locale;
   } catch (error) {
     console.error(error);
   }

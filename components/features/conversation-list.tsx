@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { routes } from "@/lib/constants/routes";
+import { useLocale } from "@/lib/hooks/useLocale";
+import { translations } from "@/lib/i18n/translations";
 import type { Conversation } from "@/lib/types/message";
 
 type ConversationListProps = {
@@ -9,10 +11,13 @@ type ConversationListProps = {
 };
 
 export function ConversationList({ conversations, selectedConversationId = null, onSelectConversation }: ConversationListProps) {
+  const { locale } = useLocale();
+  const copy = translations[locale].inbox;
+
   return (
     <div className="grid gap-3">
       {conversations.length === 0 ? (
-        <p className="text-text-muted text-sm">No conversations yet. Accepted connections will appear here.</p>
+        <p className="text-text-muted text-sm">{copy.noConversationsYet}</p>
       ) : (
         conversations.map((conversation) => (
           <div
