@@ -20,6 +20,18 @@ export function DiscoverSearch({ onFilter, isLoading = false }: DiscoverSearchPr
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedBarangay, setSelectedBarangay] = useState("");
 
+  const getFieldClassName = (isActive: boolean) =>
+    `rounded-chip mt-2 w-full border px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand ${isActive
+      ? "border-brand bg-brand/5 shadow-sm"
+      : "border-border-subtle bg-surface"
+    }`;
+
+  const getCategoryClassName = (isActive: boolean) =>
+    `btn-secondary ${isActive
+      ? "!border-brand !bg-brand !text-white !shadow-sm"
+      : ""
+    }`;
+
   const handleSearch = (value: string) => {
     setSearchQuery(value);
     onFilter(value, selectedCategory === "All" ? "" : selectedCategory, selectedCity, selectedBarangay);
@@ -60,7 +72,7 @@ export function DiscoverSearch({ onFilter, isLoading = false }: DiscoverSearchPr
             id="search"
             type="text"
             placeholder={copy.searchPlaceholder}
-            className="rounded-chip border-border-subtle mt-2 w-full border px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+            className={getFieldClassName(Boolean(searchQuery))}
             value={searchQuery}
             onChange={(e) => handleSearch(e.target.value)}
             disabled={isLoading}
@@ -73,7 +85,7 @@ export function DiscoverSearch({ onFilter, isLoading = false }: DiscoverSearchPr
           </label>
           <select
             id="city"
-            className="rounded-chip border-border-subtle mt-2 w-full border px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+            className={getFieldClassName(Boolean(selectedCity))}
             value={selectedCity}
             onChange={(e) => handleCityChange(e.target.value)}
             disabled={isLoading}
@@ -93,7 +105,7 @@ export function DiscoverSearch({ onFilter, isLoading = false }: DiscoverSearchPr
           </label>
           <select
             id="barangay"
-            className="rounded-chip border-border-subtle mt-2 w-full border px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+            className={getFieldClassName(Boolean(selectedBarangay))}
             value={selectedBarangay}
             onChange={(e) => handleBarangayChange(e.target.value)}
             disabled={isLoading || !selectedCity}
@@ -117,7 +129,8 @@ export function DiscoverSearch({ onFilter, isLoading = false }: DiscoverSearchPr
             <button
               key={category}
               onClick={() => handleCategoryChange(category)}
-              className={`btn-secondary ${selectedCategory === category ? 'btn-primary' : ''}`}
+              aria-pressed={selectedCategory === category}
+              className={getCategoryClassName(selectedCategory === category)}
               disabled={isLoading}
               type="button"
             >
