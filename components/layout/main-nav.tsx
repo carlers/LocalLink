@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { mainNavItems, routes } from "@/lib/constants/routes";
 import { translations } from "@/lib/i18n/translations";
 import { useLocale } from "@/lib/hooks/useLocale";
@@ -36,6 +36,7 @@ export function MainNav() {
   const inboxBadgeCount = useInboxBadgeCount(userId);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     window.localStorage.setItem("theme", theme);
@@ -73,23 +74,29 @@ export function MainNav() {
 
         <div className="hidden items-center gap-3 md:flex">
           <ul className="flex items-center gap-2">
-            {mainNavItems.map((item) => (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className="text-white/80 hover:text-white rounded-full px-4 py-2 text-sm font-medium transition duration-150"
-                >
-                  <span className="inline-flex items-center gap-2">
-                    <span>{copy.nav[item.labelKey]}</span>
-                    {item.href === routes.inbox && inboxBadgeCount > 0 ? (
-                      <span className="bg-brand text-white inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold leading-none">
-                        {inboxBadgeCount > 99 ? "99+" : inboxBadgeCount}
-                      </span>
-                    ) : null}
-                  </span>
-                </Link>
-              </li>
-            ))}
+            {mainNavItems.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    className={`rounded-full px-4 py-2 text-sm font-medium transition duration-150 ${isActive
+                        ? "bg-white/20 text-white"
+                        : "text-white/80 hover:bg-white/10 hover:text-white"
+                      }`}
+                  >
+                    <span className="inline-flex items-center gap-2">
+                      <span>{copy.nav[item.labelKey]}</span>
+                      {item.href === routes.inbox && inboxBadgeCount > 0 ? (
+                        <span className="bg-brand text-white inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold leading-none">
+                          {inboxBadgeCount > 99 ? "99+" : inboxBadgeCount}
+                        </span>
+                      ) : null}
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
 
           <button
@@ -180,24 +187,30 @@ export function MainNav() {
       {mobileOpen ? (
         <div id="mobile-menu" className="border-white/20 border-t bg-surface px-4 py-4 sm:px-6 md:hidden">
           <ul className="space-y-2">
-            {mainNavItems.map((item) => (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  onClick={() => setMobileOpen(false)}
-                  className="text-foreground/75 hover:text-foreground block rounded-2xl bg-surface-muted/80 px-3 py-3 text-sm font-medium transition"
-                >
-                  <span className="flex items-center justify-between gap-3">
-                    <span>{copy.nav[item.labelKey]}</span>
-                    {item.href === routes.inbox && inboxBadgeCount > 0 ? (
-                      <span className="bg-brand text-white inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold leading-none">
-                        {inboxBadgeCount > 99 ? "99+" : inboxBadgeCount}
-                      </span>
-                    ) : null}
-                  </span>
-                </Link>
-              </li>
-            ))}
+            {mainNavItems.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    onClick={() => setMobileOpen(false)}
+                    className={`block rounded-2xl px-3 py-3 text-sm font-medium transition ${isActive
+                        ? "bg-teal-600/30 text-foreground"
+                        : "bg-surface-muted/80 text-foreground/75 hover:text-foreground hover:bg-surface-muted"
+                      }`}
+                  >
+                    <span className="flex items-center justify-between gap-3">
+                      <span>{copy.nav[item.labelKey]}</span>
+                      {item.href === routes.inbox && inboxBadgeCount > 0 ? (
+                        <span className="bg-brand text-white inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold leading-none">
+                          {inboxBadgeCount > 99 ? "99+" : inboxBadgeCount}
+                        </span>
+                      ) : null}
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
 
           <div className="mt-4 flex items-center gap-3 border-border-subtle border-t pt-4">
